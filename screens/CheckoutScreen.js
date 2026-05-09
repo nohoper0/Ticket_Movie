@@ -8,10 +8,14 @@ import {
   TextInput,
   ScrollView,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  Alert
 } from "react-native";
 
-const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice = 0, onConfirmed }) => {
+const CheckoutScreen = ({ navigation, route }) => {
+  // ✅ Nhận thêm movie từ SeatSelectionScreen
+  const { selectedSeats = [], totalPrice = 0, movie } = route.params || {};
+
   const [selectedPayment, setSelectedPayment] = useState("wallet");
   const [promo, setPromo] = useState("");
 
@@ -22,6 +26,18 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
     { id: "ovo", title: "OVO", desc: "Pay with OVO balance", icon: "💎" }
   ];
 
+  const serviceFee = 5000;
+  const grandTotal = totalPrice + serviceFee;
+
+  // ✅ Điều hướng đến BookingConfirmedScreen thay vì MyTickets
+  const handlePay = () => {
+    navigation.navigate("BookingConfirmed", {
+      selectedSeats,
+      totalPrice: grandTotal,
+      movie,
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
@@ -29,7 +45,7 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
 
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => onNavigate ? onNavigate('Selection') : navigation?.goBack()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Checkout</Text>
@@ -41,12 +57,11 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
 
           <View style={styles.movieInfo}>
             <Image
-              // Thay link này bằng require("../assets/img/spider_man.jpg") của bạn
-              source={require("../assets/img/spider_man.jpg")}
+              source={movie?.img || require("../assets/img/spider_man.jpg")}
               style={styles.poster}
             />
             <View style={styles.movieDetail}>
-              <Text style={styles.movieTitle}>Spider-Man</Text>
+              <Text style={styles.movieTitle}>{movie?.name || "Movie"}</Text>
               <Text style={styles.grayText}>Cinema 1 • IMAX</Text>
               <Text style={styles.grayText}>Sat, 10 May • 19:45</Text>
             </View>
@@ -56,7 +71,9 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
 
           <View style={styles.infoRow}>
             <Text style={styles.grayText}>Seats</Text>
-            <Text style={styles.whiteText}>{selectedSeats.map(s => s.id).join(", ") || "No seats selected"}</Text>
+            <Text style={styles.whiteText}>
+              {selectedSeats.map(s => s.id).join(", ") || "No seats selected"}
+            </Text>
           </View>
 
           <View style={styles.infoRow}>
@@ -66,14 +83,14 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
 
           <View style={styles.infoRow}>
             <Text style={styles.grayText}>Service Fee</Text>
-            <Text style={styles.whiteText}>Rp 5.000</Text>
+            <Text style={styles.whiteText}>Rp {serviceFee.toLocaleString()}</Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Grand Total</Text>
-            <Text style={styles.totalPrice}>Rp {(totalPrice + 5000).toLocaleString()}</Text>
+            <Text style={styles.totalPrice}>Rp {grandTotal.toLocaleString()}</Text>
           </View>
         </View>
 
@@ -90,7 +107,12 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
             onPress={() => setSelectedPayment(p.id)}
             activeOpacity={0.7}
           >
-            <View style={[styles.iconContainer, selectedPayment === p.id && { backgroundColor: '#fb6e3b' }]}>
+            <View
+              style={[
+                styles.iconContainer,
+                selectedPayment === p.id && { backgroundColor: "#fb6e3b" }
+              ]}
+            >
               <Text style={styles.iconText}>{p.icon}</Text>
             </View>
 
@@ -99,11 +121,15 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
               <Text style={styles.grayTextSmall}>{p.desc}</Text>
             </View>
 
-            <View style={[
-              styles.radioCircle,
-              selectedPayment === p.id && styles.radioCircleActive
-            ]}>
-              {selectedPayment === p.id && <Text style={styles.checkMark}>✓</Text>}
+            <View
+              style={[
+                styles.radioCircle,
+                selectedPayment === p.id && styles.radioCircleActive
+              ]}
+            >
+              {selectedPayment === p.id && (
+                <Text style={styles.checkMark}>✓</Text>
+              )}
             </View>
           </TouchableOpacity>
         ))}
@@ -124,11 +150,10 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
         </View>
 
         {/* FINAL PAY BUTTON */}
-        <TouchableOpacity 
-          style={styles.finalPayBtn}
-          onPress={() => onConfirmed && onConfirmed()}
-        >
-          <Text style={styles.finalPayText}>Pay Rp {(totalPrice + 5000).toLocaleString()}</Text>
+        <TouchableOpacity style={styles.finalPayBtn} onPress={handlePay}>
+          <Text style={styles.finalPayText}>
+            Pay Rp {grandTotal.toLocaleString()}
+          </Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -139,7 +164,7 @@ const CheckoutScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#0d0d0d" },
   container: { flex: 1, padding: 16 },
-  
+
   header: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
   backBtn: {
     width: 45,
@@ -155,15 +180,15 @@ const styles = StyleSheet.create({
 
   card: { backgroundColor: "#151515", borderRadius: 20, padding: 20, marginBottom: 25 },
   sectionTitle: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 15 },
-  
+
   movieInfo: { flexDirection: "row", marginBottom: 15 },
   poster: { width: 75, height: 100, borderRadius: 12, marginRight: 15 },
-  movieDetail: { justifyContent: 'center' },
+  movieDetail: { justifyContent: "center" },
   movieTitle: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 4 },
-  
+
   divider: { height: 1, backgroundColor: "#262626", marginVertical: 15 },
   infoRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 10 },
-  
+
   whiteText: { color: "#fff", fontWeight: "500" },
   grayText: { color: "#888", fontSize: 14 },
   grayTextSmall: { color: "#666", fontSize: 12 },
@@ -173,7 +198,7 @@ const styles = StyleSheet.create({
   totalPrice: { color: "#fb6e3b", fontSize: 18, fontWeight: "bold" },
 
   mainSectionTitle: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 15, marginTop: 5 },
-  
+
   paymentItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -182,10 +207,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'transparent'
+    borderColor: "transparent"
   },
   activePayment: { borderColor: "#fb6e3b" },
-  
+
   iconContainer: {
     width: 45,
     height: 45,
@@ -198,7 +223,7 @@ const styles = StyleSheet.create({
   iconText: { fontSize: 20 },
   paymentTextContainer: { flex: 1 },
   paymentTitle: { color: "#fff", fontWeight: "600", fontSize: 15 },
-  
+
   radioCircle: {
     width: 24,
     height: 24,

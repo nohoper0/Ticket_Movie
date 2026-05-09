@@ -1,3 +1,4 @@
+// screens/BookingConfirmedScreen.js
 import React from "react";
 import {
   View,
@@ -5,105 +6,108 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ScrollView
+  ScrollView,
+  SafeAreaView,
 } from "react-native";
 
-const BookingConfirmedScreen = ({ navigation, onNavigate, selectedSeats = [], totalPrice = 0 }) => {
+import { COLORS } from "../utils/colors";
+
+const BookingConfirmedScreen = ({ navigation, route }) => {
+  const { selectedSeats = [], totalPrice = 0, movie } = route.params || {};
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* SUCCESS ICON */}
+        <View style={styles.successWrapper}>
+          <Text style={styles.check}>✓</Text>
+        </View>
 
-      {/* SUCCESS ICON */}
-      <View style={styles.successWrapper}>
-        <Text style={styles.check}>✓</Text>
-      </View>
+        {/* TITLE */}
+        <Text style={styles.title}>Booking Confirmed!</Text>
+        <Text style={styles.subtitle}>
+          Your tickets have been booked successfully.
+        </Text>
 
-      {/* TITLE */}
-      <Text style={styles.title}>Booking Confirmed!</Text>
-      <Text style={styles.subtitle}>
-        Your tickets have been booked successfully.
-      </Text>
+        {/* CARD */}
+        <View style={styles.card}>
+          {/* MOVIE INFO */}
+          <View style={styles.movieInfo}>
+            <Image
+              source={movie?.img || require("../assets/img/spider_man.jpg")}
+              style={styles.poster}
+            />
 
-      {/* CARD */}
-      <View style={styles.card}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.movieTitle}>
+                {movie?.name || "Avengers: Secret Wars"}
+              </Text>
+              <Text style={styles.meta}>Cinema 1 • IMAX</Text>
+              <Text style={styles.meta}>Sat, 10 May • 19:45</Text>
+            </View>
+          </View>
 
-        {/* MOVIE INFO */}
-        <View style={styles.movieInfo}>
-          <Image
-            source={{
-              uri: "https://via.placeholder.com/70x90"
-            }}
-            style={styles.poster}
-          />
+          <View style={styles.divider} />
 
-          <View>
-            <Text style={styles.movieTitle}>
-              Avengers: Secret Wars
+          {/* DETAILS */}
+          <View style={styles.row}>
+            <Text style={styles.label}>Seats</Text>
+            <Text style={styles.value}>
+              {selectedSeats.map((s) => s.id).join(", ") || "No seats selected"}
             </Text>
-            <Text style={styles.meta}>
-              Cinema 1 • IMAX
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Total Paid</Text>
+            <Text style={styles.price}>
+              Rp {(totalPrice + 5000).toLocaleString()}
             </Text>
-            <Text style={styles.meta}>
-              Sat, 10 May • 19:45
-            </Text>
+          </View>
+
+          {/* DASHED LINE */}
+          <View style={styles.dashed} />
+
+          {/* BARCODE (fake) */}
+          <View style={styles.barcodeBox}>
+            <View style={styles.barcode} />
+            <Text style={styles.ticketId}>TKM-2025-88SGZWZ5</Text>
           </View>
         </View>
 
-        <View style={styles.divider} />
+        {/* BUTTONS */}
+        <View style={styles.btnRow}>
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => navigation.navigate("MyTickets")}
+          >
+            <Text style={styles.btnText}>My Tickets</Text>
+          </TouchableOpacity>
 
-        {/* DETAILS */}
-        <View style={styles.row}>
-          <Text style={styles.label}>Seats</Text>
-          <Text style={styles.value}>{selectedSeats.map(s => s.id).join(", ") || "No seats selected"}</Text>
+          <TouchableOpacity
+            style={styles.secondaryBtn}
+            onPress={() => navigation.navigate("Home")}
+          >
+            <Text style={styles.btnText}>Home</Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Total Paid</Text>
-          <Text style={styles.price}>Rp {(totalPrice + 5000).toLocaleString()}</Text>
-        </View>
-
-        {/* DASHED LINE */}
-        <View style={styles.dashed} />
-
-        {/* BARCODE (fake) */}
-        <View style={styles.barcodeBox}>
-          <View style={styles.barcode} />
-          <Text style={styles.ticketId}>
-            TKM-2025-88SGZWZ5
-          </Text>
-        </View>
-
-      </View>
-
-      {/* BUTTONS */}
-      <View style={styles.btnRow}>
-        <TouchableOpacity 
-          style={styles.primaryBtn}
-          onPress={() => onNavigate ? onNavigate('MyTickets') : navigation?.navigate('MyTickets')}
-        >
-          <Text style={styles.btnText}>My Tickets</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.secondaryBtn}
-          onPress={() => onNavigate ? onNavigate('Home') : navigation?.navigate('Home')}
-        >
-          <Text style={styles.btnText}>Home</Text>
-        </TouchableOpacity>
-      </View>
-
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 export default BookingConfirmedScreen;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+
   container: {
     flexGrow: 1,
-    backgroundColor: "#0d0d0d",
     alignItems: "center",
     justifyContent: "center",
-    padding: 20
+    padding: 20,
   },
 
   successWrapper: {
@@ -113,94 +117,98 @@ const styles = StyleSheet.create({
     backgroundColor: "#1b3b24",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20
+    marginBottom: 20,
   },
 
   check: {
     color: "#4ade80",
     fontSize: 30,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
 
   title: {
-    color: "#fff",
+    color: COLORS.text,
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 5
+    marginBottom: 5,
   },
 
   subtitle: {
-    color: "#888",
+    color: COLORS.gray,
     fontSize: 14,
     marginBottom: 20,
-    textAlign: "center"
+    textAlign: "center",
   },
 
   card: {
     width: "100%",
-    backgroundColor: "#1a1a1a",
+    backgroundColor: COLORS.card,
     borderRadius: 20,
     padding: 15,
-    marginBottom: 20
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   movieInfo: {
     flexDirection: "row",
     gap: 10,
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   poster: {
     width: 70,
     height: 90,
-    borderRadius: 10
+    borderRadius: 10,
   },
 
   movieTitle: {
-    color: "#fff",
-    fontWeight: "bold"
+    color: COLORS.text,
+    fontWeight: "bold",
+    fontSize: 16,
   },
 
   meta: {
-    color: "#888",
-    fontSize: 12
+    color: COLORS.gray,
+    fontSize: 12,
+    marginTop: 2,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#333",
-    marginVertical: 10
+    backgroundColor: COLORS.border,
+    marginVertical: 10,
   },
 
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8
+    marginBottom: 8,
   },
 
   label: {
-    color: "#888"
+    color: COLORS.gray,
   },
 
   value: {
-    color: "#fff",
-    fontWeight: "bold"
+    color: COLORS.text,
+    fontWeight: "bold",
   },
 
   price: {
     color: "#fb6e3b",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
 
   dashed: {
     borderStyle: "dashed",
     borderWidth: 1,
-    borderColor: "#333",
-    marginVertical: 15
+    borderColor: COLORS.border,
+    marginVertical: 15,
   },
 
   barcodeBox: {
-    alignItems: "center"
+    alignItems: "center",
   },
 
   barcode: {
@@ -208,19 +216,20 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: "#fff",
     opacity: 0.2,
-    marginBottom: 10
+    marginBottom: 10,
+    borderRadius: 10,
   },
 
   ticketId: {
     color: "#555",
     fontSize: 12,
-    letterSpacing: 2
+    letterSpacing: 2,
   },
 
   btnRow: {
     flexDirection: "row",
     gap: 10,
-    width: "100%"
+    width: "100%",
   },
 
   primaryBtn: {
@@ -228,7 +237,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fb6e3b",
     padding: 15,
     borderRadius: 15,
-    alignItems: "center"
+    alignItems: "center",
   },
 
   secondaryBtn: {
@@ -236,11 +245,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#2a2a2a",
     padding: 15,
     borderRadius: 15,
-    alignItems: "center"
+    alignItems: "center",
   },
 
   btnText: {
-    color: "#fff",
-    fontWeight: "bold"
-  }
+    color: COLORS.text,
+    fontWeight: "bold",
+  },
 });

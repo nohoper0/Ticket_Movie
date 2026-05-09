@@ -7,7 +7,9 @@ import {
   ScrollView
 } from "react-native";
 
-const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
+const SeatSelectionScreen = ({ navigation, route }) => {
+  // Nhận movie được truyền từ MovieDetailScreen
+  const { movie } = route.params || {};
 
   // 🔥 DATA GHẾ
   const [seats, setSeats] = useState([
@@ -84,8 +86,8 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
 
   // 🎯 TOGGLE GHẾ
   const toggleSeat = (id) => {
-    setSeats(prev =>
-      prev.map(s =>
+    setSeats((prev) =>
+      prev.map((s) =>
         s.id === id ? { ...s, selected: !s.selected } : s
       )
     );
@@ -95,7 +97,7 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
   const vipPrice = 85000;
   const normalPrice = 50000;
 
-  const selectedSeats = seats.filter(s => s.selected);
+  const selectedSeats = seats.filter((s) => s.selected);
 
   const total = selectedSeats.reduce((sum, s) => {
     return sum + (s.type === "vip" ? vipPrice : normalPrice);
@@ -103,12 +105,14 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
 
   return (
     <View style={styles.container}>
-
       <ScrollView>
 
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => onNavigate('Detail')}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+          >
             <Text style={{ color: "#fff" }}>←</Text>
           </TouchableOpacity>
 
@@ -128,14 +132,14 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
 
         {/* SEATS */}
         <View style={styles.seatArea}>
-          {["A", "B", "C", "D", "E", "F", "G"].map(row => (
+          {["A", "B", "C", "D", "E", "F", "G"].map((row) => (
             <View key={row} style={styles.row}>
               <Text style={styles.rowLabel}>{row}</Text>
 
               <View style={styles.seatRow}>
                 {seats
-                  .filter(s => s.row === row)
-                  .map(seat => (
+                  .filter((s) => s.row === row)
+                  .map((seat) => (
                     <TouchableOpacity
                       key={seat.id}
                       style={[
@@ -144,13 +148,15 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
                         seat.selected &&
                           (seat.type === "vip"
                             ? styles.vipSelected
-                            : styles.selected)
+                            : styles.selected),
+                        seat.type === "unavailable" && styles.unavailable
                       ]}
-                      onPress={() => toggleSeat(seat.id)}
+                      onPress={() => {
+                        if (seat.type !== "unavailable") toggleSeat(seat.id);
+                      }}
+                      activeOpacity={0.8}
                     >
-                      <Text style={styles.seatText}>
-                        {seat.num}
-                      </Text>
+                      <Text style={styles.seatText}>{seat.num}</Text>
                     </TouchableOpacity>
                   ))}
               </View>
@@ -185,17 +191,16 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
 
         {/* SUMMARY */}
         <View style={styles.summary}>
-
           <View style={styles.rowBetween}>
             <Text style={styles.gray}>Selected Seats</Text>
             <Text style={styles.whiteBold}>
-              {selectedSeats.map(s => s.id).join(", ") || "-"}
+              {selectedSeats.map((s) => s.id).join(", ") || "-"}
             </Text>
           </View>
 
           <View style={styles.rowBetween}>
             <Text style={styles.gray}>
-              Regular × {selectedSeats.filter(s => s.type === "normal").length}
+              Regular × {selectedSeats.filter((s) => s.type === "normal").length}
             </Text>
             <Text style={styles.whiteBold}>
               Rp {normalPrice.toLocaleString()}
@@ -204,7 +209,7 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
 
           <View style={styles.rowBetween}>
             <Text style={styles.gray}>
-              VIP × {selectedSeats.filter(s => s.type === "vip").length}
+              VIP × {selectedSeats.filter((s) => s.type === "vip").length}
             </Text>
             <Text style={styles.whiteBold}>
               Rp {vipPrice.toLocaleString()}
@@ -219,27 +224,34 @@ const SeatSelectionScreen = ({ onNavigate, onCheckout }) => {
               Rp {total.toLocaleString()}
             </Text>
           </View>
-
         </View>
-
       </ScrollView>
 
       {/* BUTTON */}
-      <TouchableOpacity 
-        style={styles.btn}
-        onPress={() => onCheckout && onCheckout(selectedSeats, total)}
+      <TouchableOpacity
+        style={[
+          styles.btn,
+          selectedSeats.length === 0 && { opacity: 0.5 }
+        ]}
+        onPress={() =>
+          navigation.navigate("Checkout", {
+            selectedSeats: selectedSeats,
+            totalPrice: total,
+            movie: movie,       // ✅ Truyền movie sang Checkout
+          })
+        }
         disabled={selectedSeats.length === 0}
       >
         <Text style={styles.btnText}>
           Continue — {selectedSeats.length} seats
         </Text>
       </TouchableOpacity>
-
     </View>
   );
 };
 
 export default SeatSelectionScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -309,6 +321,11 @@ const styles = StyleSheet.create({
     borderColor: "#6358dc"
   },
 
+  unavailable: {
+    backgroundColor: "#151515",
+    opacity: 0.8
+  },
+
   selected: {
     backgroundColor: "#fb6e3b"
   },
@@ -373,7 +390,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fb6e3b",
     padding: 15,
     borderRadius: 20,
-    alignItems: "center"
+    alignItems: "center",
+    marginTop: 10
   },
 
   btnText: {

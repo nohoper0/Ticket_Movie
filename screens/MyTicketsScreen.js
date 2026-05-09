@@ -8,21 +8,15 @@ import {
   ScrollView
 } from "react-native";
 
-const MyTicketsScreen = ({ onNavigate }) => {
+const MyTicketsScreen = ({ navigation }) => {
   const [tab, setTab] = useState("upcoming");
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        
+
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backBtn}
-            onPress={() => onNavigate && onNavigate('Home')}
-          >
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>My Tickets</Text>
             <Text style={styles.subtitle}>Your movie booking history</Text>
@@ -53,41 +47,6 @@ const MyTicketsScreen = ({ onNavigate }) => {
         {/* LIST */}
         {tab === "upcoming" ? <Upcoming /> : <Used />}
       </ScrollView>
-
-      {/* NAVBAR */}
-      <View style={styles.navbar}>
-        <TouchableOpacity 
-          style={styles.navItem}
-          onPress={() => onNavigate && onNavigate('Home')}
-        >
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navLabel}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navItem}
-          onPress={() => onNavigate && onNavigate('Search')}
-        >
-          <Text style={styles.navIcon}>🔍</Text>
-          <Text style={styles.navLabel}>Search</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.navItem, styles.navItemActive]}
-          onPress={() => onNavigate && onNavigate('MyTickets')}
-        >
-          <Text style={styles.navIcon}>🎫</Text>
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Tickets</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.navItem}
-          onPress={() => onNavigate && onNavigate('Profile')}
-        >
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
@@ -104,10 +63,7 @@ const TicketCard = ({ item, used }) => (
       <View style={{ flex: 1 }}>
         <View style={styles.rowBetween}>
           <Text style={styles.movie}>{item.name}</Text>
-          <Text style={[
-            styles.badge,
-            used ? styles.used : styles.upcoming
-          ]}>
+          <Text style={[styles.badge, used ? styles.used : styles.upcoming]}>
             {used ? "USED" : "UPCOMING"}
           </Text>
         </View>
@@ -217,21 +173,6 @@ const styles = StyleSheet.create({
     gap: 10
   },
 
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#222",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-
-  backText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold"
-  },
-
   title: {
     fontSize: 24,
     color: "#fff",
@@ -273,7 +214,8 @@ const styles = StyleSheet.create({
 
   list: {
     padding: 20,
-    gap: 20
+    gap: 20,
+    paddingBottom: 20
   },
 
   card: {
@@ -339,6 +281,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
 
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+
   price: {
     color: "#ff6b35",
     fontWeight: "bold"
@@ -351,43 +298,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10
   },
-
-  navbar: {
-    flexDirection: "row",
-    backgroundColor: "#151515",
-    borderTopWidth: 1,
-    borderTopColor: "#262626",
-    paddingVertical: 10,
-    justifyContent: "space-around",
-    alignItems: "center"
-  },
-
-  navItem: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    flex: 1
-  },
-
-  navItemActive: {
-    backgroundColor: "rgba(255, 107, 53, 0.1)",
-    borderRadius: 12
-  },
-
-  navIcon: {
-    fontSize: 24,
-    marginBottom: 4
-  },
-
-  navLabel: {
-    color: "#888",
-    fontSize: 12,
-    fontWeight: "500"
-  },
-
-  navLabelActive: {
-    color: "#ff6b35",
-    fontWeight: "bold"
-  }
 });

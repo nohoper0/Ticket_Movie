@@ -8,11 +8,11 @@ import {
   TouchableOpacity
 } from "react-native";
 
-const MovieDetailScreen = ({ onNavigate, movie }) => {
+export default function MovieDetailScreen({ navigation, route }) {
+  const { movie } = route.params;
+
   const [selectedDate, setSelectedDate] = useState(4);
   const [selectedTime, setSelectedTime] = useState("13:15");
-
-  if (!movie) return null;
 
   const dates = [
     { day: "Mon", num: 5 },
@@ -28,35 +28,26 @@ const MovieDetailScreen = ({ onNavigate, movie }) => {
 
   return (
     <View style={styles.container}>
-
       <ScrollView>
 
-        {/* Banner */}
         <View style={styles.banner}>
-          <Image
-            source={require('../assets/img/spider_man.jpg')}
-            style={styles.bannerImg}
-          />
+          <Image source={movie.img} style={styles.bannerImg} />
 
           <View style={styles.play}>
             <Text style={{ color: "#fff" }}>▶</Text>
           </View>
         </View>
 
-        {/* Content */}
         <View style={styles.content}>
-
           <Text style={styles.title}>{movie.name}</Text>
           <Text style={styles.meta}>⭐ {movie.rating} | 2h 45m | 2025</Text>
 
-          {/* Tags */}
           <View style={styles.tags}>
             {movie.genre.split(", ").map((g, idx) => (
               <Text key={idx} style={styles.tag}>{g}</Text>
             ))}
           </View>
 
-          {/* Synopsis */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Synopsis</Text>
             <Text style={styles.desc}>
@@ -64,16 +55,13 @@ const MovieDetailScreen = ({ onNavigate, movie }) => {
             </Text>
           </View>
 
-          {/* Cinema */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Select Cinema</Text>
-
-            <View style={styles.cinema}><Text>XXI Grand Indonesia</Text></View>
-            <View style={styles.cinema}><Text>CGV Blitz Megamall</Text></View>
-            <View style={styles.cinema}><Text>Cinépolis Kota Kasablanka</Text></View>
+            <View style={styles.cinema}><Text style={{ color: "#fff" }}>XXI Grand Indonesia</Text></View>
+            <View style={styles.cinema}><Text style={{ color: "#fff" }}>CGV Blitz Megamall</Text></View>
+            <View style={styles.cinema}><Text style={{ color: "#fff" }}>Cinépolis Kota Kasablanka</Text></View>
           </View>
 
-          {/* Date */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Select Date</Text>
 
@@ -82,10 +70,7 @@ const MovieDetailScreen = ({ onNavigate, movie }) => {
                 {dates.map((d, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.date,
-                      selectedDate === index && styles.active
-                    ]}
+                    style={[styles.date, selectedDate === index && styles.active]}
                     onPress={() => setSelectedDate(index)}
                   >
                     <Text style={styles.dateText}>{d.day}</Text>
@@ -96,7 +81,6 @@ const MovieDetailScreen = ({ onNavigate, movie }) => {
             </ScrollView>
           </View>
 
-          {/* Time */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Select Time</Text>
 
@@ -104,10 +88,7 @@ const MovieDetailScreen = ({ onNavigate, movie }) => {
               {times.map((t, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={[
-                    styles.time,
-                    selectedTime === t && styles.active
-                  ]}
+                  style={[styles.time, selectedTime === t && styles.active]}
                   onPress={() => setSelectedTime(t)}
                 >
                   <Text style={styles.timeText}>{t}</Text>
@@ -115,173 +96,55 @@ const MovieDetailScreen = ({ onNavigate, movie }) => {
               ))}
             </View>
           </View>
-
         </View>
       </ScrollView>
 
-      {/* Button */}
       <View style={styles.bottom}>
-        <TouchableOpacity style={styles.btn} onPress={() => onNavigate('Selection')}>
-          <Text style={styles.btnText}>
-            Book Now — {selectedTime}
-          </Text>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() => navigation.navigate("Selection", { movie })}
+        >
+          <Text style={styles.btnText}>Book Now — {selectedTime}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* NAVBAR */}
-      <View style={styles.navbar}>
-        <NavItem label="Back" icon="◀" onPress={() => onNavigate('Home')} />
-      </View>
-
+      <TouchableOpacity style={styles.backFloating} onPress={() => navigation.goBack()}>
+        <Text style={{ color: "#fff", fontSize: 18 }}>←</Text>
+      </TouchableOpacity>
     </View>
   );
-};
+}
 
-const NavItem = ({ label, icon, onPress }) => (
-  <TouchableOpacity onPress={onPress}>
-    <View style={styles.navItem}>
-      <Text style={{ color: "#ff6b2c" }}>{icon}</Text>
-      <Text style={{ color: "#ff6b2c", fontSize: 12 }}>
-        {label}
-      </Text>
-    </View>
-  </TouchableOpacity>
-);
-
-export default MovieDetailScreen;
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0d0d0d"
-  },
-
-  banner: {
-    position: "relative"
-  },
-
-  bannerImg: {
-    width: "100%",
-    height: 250
-  },
-
-  play: {
+  container: { flex: 1, backgroundColor: "#0d0d0d" },
+  banner: { position: "relative" },
+  bannerImg: { width: "100%", height: 250 },
+  play: { position: "absolute", top: "45%", left: "45%", backgroundColor: "rgba(255,255,255,0.2)", padding: 20, borderRadius: 50 },
+  content: { padding: 15 },
+  title: { fontSize: 22, fontWeight: "bold", color: "#fff" },
+  meta: { color: "#aaa", marginVertical: 10 },
+  tags: { flexDirection: "row", gap: 10, marginBottom: 10 },
+  tag: { backgroundColor: "#1c1c1c", color: "#fff", padding: 6, borderRadius: 20 },
+  section: { marginTop: 15 },
+  sectionTitle: { color: "#fff", fontWeight: "bold", marginBottom: 10 },
+  desc: { color: "#aaa" },
+  cinema: { backgroundColor: "#1c1c1c", padding: 15, borderRadius: 10, marginBottom: 10 },
+  row: { flexDirection: "row", gap: 10 },
+  date: { backgroundColor: "#1c1c1c", padding: 10, borderRadius: 10, alignItems: "center", width: 60 },
+  dateText: { color: "#fff" },
+  time: { backgroundColor: "#1c1c1c", padding: 10, borderRadius: 10 },
+  timeText: { color: "#fff" },
+  times: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  active: { backgroundColor: "#ff6b2c" },
+  bottom: { padding: 15, backgroundColor: "#0d0d0d" },
+  btn: { backgroundColor: "#ff6b2c", padding: 15, borderRadius: 30, alignItems: "center" },
+  btnText: { color: "#fff", fontSize: 16 },
+  backFloating: {
     position: "absolute",
-    top: "45%",
-    left: "45%",
-    backgroundColor: "rgba(255,255,255,0.2)",
-    padding: 20,
-    borderRadius: 50
-  },
-
-  content: {
-    padding: 15
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#fff"
-  },
-
-  meta: {
-    color: "#aaa",
-    marginVertical: 10
-  },
-
-  tags: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 10
-  },
-
-  tag: {
-    backgroundColor: "#1c1c1c",
-    color: "#fff",
-    padding: 6,
-    borderRadius: 20
-  },
-
-  section: {
-    marginTop: 15
-  },
-
-  sectionTitle: {
-    color: "#fff",
-    fontWeight: "bold",
-    marginBottom: 10
-  },
-
-  desc: {
-    color: "#aaa"
-  },
-
-  cinema: {
-    backgroundColor: "#1c1c1c",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10
-  },
-
-  row: {
-    flexDirection: "row",
-    gap: 10
-  },
-
-  date: {
-    backgroundColor: "#1c1c1c",
+    top: 40,
+    left: 15,
+    backgroundColor: "rgba(0,0,0,0.5)",
     padding: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    width: 60
-  },
-
-  dateText: {
-    color: "#fff"
-  },
-
-  time: {
-    backgroundColor: "#1c1c1c",
-    padding: 10,
-    borderRadius: 10
-  },
-
-  timeText: {
-    color: "#fff"
-  },
-
-  times: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10
-  },
-
-  active: {
-    backgroundColor: "#ff6b2c"
-  },
-
-  bottom: {
-    padding: 15,
-    backgroundColor: "#0d0d0d"
-  },
-
-  btn: {
-    backgroundColor: "#ff6b2c",
-    padding: 15,
-    borderRadius: 30,
-    alignItems: "center"
-  },
-
-  btnText: {
-    color: "#fff",
-    fontSize: 16
-  },
-
-  navbar: {
-    padding: 15,
-    backgroundColor: "#0d0d0d"
-  },
-
-  navItem: {
-    alignItems: "center"
+    borderRadius: 50,
   }
 });
