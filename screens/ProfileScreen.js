@@ -74,8 +74,9 @@ export default function ProfileScreen() {
           </Text>
 
           <Text style={styles.email}>
-            {user?.email ||
-              "guest@email.com"}
+            {typeof user?.email === 'object' 
+              ? user?.email?.email || "guest@email.com"
+              : user?.email || "guest@email.com"}
           </Text>
 
           <View style={styles.badge}>

@@ -59,11 +59,7 @@ export default function LoginScreen({
     try {
       setLoading(true);
 
-      const userData = {
-        email: email.trim(),
-      };
-
-      await login(userData);
+      await login(email.trim());
 
     } catch (e) {
       Alert.alert(

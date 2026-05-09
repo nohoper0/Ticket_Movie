@@ -14,6 +14,10 @@ export const AuthProvider = ({ children }) => {
   const checkLogin = async () => {
     try {
       const data = await getUser();
+      // Fix old nested data structure if it exists
+      if (data?.email && typeof data.email === 'object') {
+        data.email = data.email.email || "";
+      }
       setUser(data);
     } catch (e) {
       setUser(null);
