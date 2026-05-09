@@ -60,7 +60,7 @@ const BookingConfirmedScreen = ({ navigation, route }) => {
           <View style={styles.row}>
             <Text style={styles.label}>Total Paid</Text>
             <Text style={styles.price}>
-              Rp {(totalPrice + 5000).toLocaleString()}
+              Rp {totalPrice.toLocaleString()}
             </Text>
           </View>
 
@@ -78,14 +78,14 @@ const BookingConfirmedScreen = ({ navigation, route }) => {
         <View style={styles.btnRow}>
           <TouchableOpacity
             style={styles.primaryBtn}
-            onPress={() => navigation.navigate("MyTickets")}
+            onPress={() => navigation.navigate("HomeTab", { screen: "Tickets" })}
           >
             <Text style={styles.btnText}>My Tickets</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.secondaryBtn}
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("HomeTab", { screen: "Home" })}
           >
             <Text style={styles.btnText}>Home</Text>
           </TouchableOpacity>

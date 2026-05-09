@@ -78,15 +78,25 @@ const CheckoutScreen = ({ navigation, route }) => {
     try {
       setPaying(true);
 
+      // movieDate = 3 ngày tới => vừa đặt sẽ là UPCOMING, sau ngày đó qua => USED
+      const movieDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      const dateLabel = movieDate.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+
       const newTicket = {
         id: `${Date.now()}-${Math.random()}`,
         movie,
         seats: selectedSeats,
         total: grandTotal,
         time: "19:45",
-        date: "Sat, 10 May 2025",
+        date: dateLabel,
+        movieDate: movieDate.toISOString(),
         paymentMethod: selectedPayment,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       // ✅ save ticket

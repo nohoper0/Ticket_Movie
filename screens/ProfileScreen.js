@@ -8,10 +8,11 @@ import {
   ScrollView,
   Switch,
   Alert,
-  Image,
 } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
+
+import { COLORS } from "../utils/colors";
 
 export default function ProfileScreen() {
   const [notification, setNotification] =
@@ -29,6 +30,7 @@ export default function ProfileScreen() {
           text: "Cancel",
           style: "cancel",
         },
+
         {
           text: "Logout",
           style: "destructive",
@@ -74,9 +76,12 @@ export default function ProfileScreen() {
           </Text>
 
           <Text style={styles.email}>
-            {typeof user?.email === 'object' 
-              ? user?.email?.email || "guest@email.com"
-              : user?.email || "guest@email.com"}
+            {typeof user?.email ===
+            "object"
+              ? user?.email?.email ||
+                "guest@email.com"
+              : user?.email ||
+                "guest@email.com"}
           </Text>
 
           <View style={styles.badge}>
@@ -110,7 +115,7 @@ export default function ProfileScreen() {
               }
               trackColor={{
                 false: "#444",
-                true: "#ff6b35",
+                true: COLORS.primary,
               }}
               thumbColor="#fff"
             />
@@ -120,7 +125,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.menuItem}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
             <View>
               <Text
@@ -145,7 +150,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.menuItem}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
             <View>
               <Text
@@ -170,7 +175,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.menuItem}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
             <View>
               <Text
@@ -215,7 +220,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={styles.signout}
           onPress={handleLogout}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
           <Text style={styles.signoutText}>
             Sign Out
@@ -234,12 +239,13 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor:
+      COLORS.background,
   },
 
   scroll: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
 
   ////////////////// HEADER //////////////////
@@ -249,31 +255,35 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    color: "#fff",
+    color: COLORS.text,
     fontSize: 28,
     fontWeight: "bold",
   },
 
   headerSub: {
-    color: "#888",
+    color: COLORS.gray,
     marginTop: 5,
   },
 
   ////////////////// PROFILE //////////////////
 
   profileCard: {
-    backgroundColor: "#1c1c1e",
+    backgroundColor: COLORS.card,
     padding: 25,
     borderRadius: 25,
     marginTop: 20,
     alignItems: "center",
+
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   avatar: {
     width: 85,
     height: 85,
     borderRadius: 42.5,
-    backgroundColor: "#ff6b35",
+    backgroundColor:
+      COLORS.primary,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
@@ -286,37 +296,41 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    color: "#fff",
+    color: COLORS.text,
     fontSize: 22,
     fontWeight: "bold",
   },
 
   email: {
-    color: "#aaa",
+    color: COLORS.gray,
     marginTop: 6,
     fontSize: 14,
   },
 
   badge: {
     marginTop: 15,
-    backgroundColor: "#2a1a14",
+    backgroundColor:
+      "rgba(251,110,59,0.15)",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
   },
 
   badgeText: {
-    color: "#ff8a65",
+    color: COLORS.primary,
     fontWeight: "600",
   },
 
   ////////////////// MENU //////////////////
 
   menu: {
-    backgroundColor: "#1c1c1e",
+    backgroundColor: COLORS.card,
     borderRadius: 22,
     marginTop: 25,
     overflow: "hidden",
+
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   menuItem: {
@@ -328,25 +342,26 @@ const styles = StyleSheet.create({
   },
 
   menuTitle: {
-    color: "#fff",
+    color: COLORS.text,
     fontSize: 15,
     fontWeight: "600",
   },
 
   menuSub: {
-    color: "#888",
+    color: COLORS.gray,
     fontSize: 12,
     marginTop: 4,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#2c2c2e",
+    backgroundColor:
+      COLORS.border,
     marginLeft: 18,
   },
 
   arrow: {
-    color: "#666",
+    color: COLORS.gray,
     fontSize: 22,
   },
 
@@ -360,20 +375,23 @@ const styles = StyleSheet.create({
 
   statCard: {
     flex: 1,
-    backgroundColor: "#1c1c1e",
+    backgroundColor: COLORS.card,
     padding: 20,
     borderRadius: 20,
     alignItems: "center",
+
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   statNumber: {
-    color: "#ff6b35",
+    color: COLORS.primary,
     fontSize: 24,
     fontWeight: "bold",
   },
 
   statLabel: {
-    color: "#888",
+    color: COLORS.gray,
     marginTop: 6,
     fontSize: 12,
   },
@@ -381,13 +399,16 @@ const styles = StyleSheet.create({
   ////////////////// SIGN OUT //////////////////
 
   signout: {
-    backgroundColor: "#2a1515",
+    backgroundColor:
+      "rgba(255,82,82,0.12)",
     padding: 18,
     borderRadius: 20,
     alignItems: "center",
     marginTop: 30,
+
     borderWidth: 1,
-    borderColor: "#4d1f1f",
+    borderColor:
+      "rgba(255,82,82,0.2)",
   },
 
   signoutText: {
@@ -400,7 +421,7 @@ const styles = StyleSheet.create({
 
   footer: {
     textAlign: "center",
-    color: "#555",
+    color: COLORS.gray,
     marginTop: 25,
     fontSize: 12,
   },

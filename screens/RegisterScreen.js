@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ScrollView,
 } from "react-native";
 
 import { COLORS }
@@ -35,8 +36,8 @@ export default function RegisterScreen({
       !password.trim()
     ) {
       Alert.alert(
-        "Lỗi",
-        "Vui lòng nhập đầy đủ thông tin!"
+        "Error",
+        "Please fill all fields!"
       );
 
       return;
@@ -48,8 +49,8 @@ export default function RegisterScreen({
 
     if (!emailRegex.test(email)) {
       Alert.alert(
-        "Lỗi",
-        "Email không hợp lệ!"
+        "Error",
+        "Invalid email!"
       );
 
       return;
@@ -58,8 +59,8 @@ export default function RegisterScreen({
     // VALIDATE PASSWORD
     if (password.length < 6) {
       Alert.alert(
-        "Lỗi",
-        "Password tối thiểu 6 ký tự!"
+        "Error",
+        "Password must be at least 6 characters!"
       );
 
       return;
@@ -69,16 +70,16 @@ export default function RegisterScreen({
       setLoading(true);
 
       Alert.alert(
-        "Thành công",
-        "Đăng ký thành công!"
+        "Success",
+        "Register success!"
       );
 
       navigation.navigate("Login");
 
     } catch (e) {
       Alert.alert(
-        "Lỗi",
-        "Đăng ký thất bại!"
+        "Error",
+        "Register failed!"
       );
     } finally {
       setLoading(false);
@@ -87,92 +88,104 @@ export default function RegisterScreen({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        Register Account
-      </Text>
-
-      <Text style={styles.subtitle}>
-        Create your Ticket Movie account
-      </Text>
-
-      <View style={styles.card}>
-        <Text style={styles.label}>
-          Full Name
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent:
+            "center",
+        }}
+        showsVerticalScrollIndicator={
+          false
+        }
+      >
+        <Text style={styles.title}>
+          Register Account
         </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="John Doe"
-          placeholderTextColor={
-            COLORS.gray
-          }
-          value={fullname}
-          onChangeText={setFullname}
-        />
-
-        <Text style={styles.label}>
-          Email
+        <Text style={styles.subtitle}>
+          Create your Ticket Movie account
         </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="example@gmail.com"
-          placeholderTextColor={
-            COLORS.gray
-          }
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        <Text style={styles.label}>
-          Password
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="********"
-          placeholderTextColor={
-            COLORS.gray
-          }
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        <TouchableOpacity
-          style={[
-            styles.btn,
-            loading && {
-              opacity: 0.6,
-            },
-          ]}
-          onPress={handleRegister}
-          disabled={loading}
-        >
-          <Text style={styles.btnText}>
-            {loading
-              ? "LOADING..."
-              : "REGISTER"}
+        <View style={styles.card}>
+          <Text style={styles.label}>
+            Full Name
           </Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate(
-              "Login"
-            )
-          }
-        >
-          <Text style={styles.link}>
-            Already have an account?{" "}
-            <Text style={styles.linkBold}>
-              Login
+          <TextInput
+            style={styles.input}
+            placeholder="John Doe"
+            placeholderTextColor={
+              COLORS.gray
+            }
+            value={fullname}
+            onChangeText={setFullname}
+          />
+
+          <Text style={styles.label}>
+            Email
+          </Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="example@gmail.com"
+            placeholderTextColor={
+              COLORS.gray
+            }
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <Text style={styles.label}>
+            Password
+          </Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="********"
+            placeholderTextColor={
+              COLORS.gray
+            }
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.btn,
+              loading && {
+                opacity: 0.6,
+              },
+            ]}
+            onPress={handleRegister}
+            disabled={loading}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.btnText}>
+              {loading
+                ? "LOADING..."
+                : "REGISTER"}
             </Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(
+                "Login"
+              )
+            }
+          >
+            <Text style={styles.link}>
+              Already have an account?{" "}
+              <Text style={styles.linkBold}>
+                Login
+              </Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -182,13 +195,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor:
       COLORS.background,
-
-    justifyContent: "center",
     padding: 20,
   },
 
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
     color: COLORS.text,
     textAlign: "center",
@@ -197,53 +208,62 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: "center",
     color: COLORS.gray,
-    marginBottom: 30,
+    marginBottom: 35,
+    marginTop: 10,
+    fontSize: 14,
   },
 
   card: {
     backgroundColor:
       COLORS.card,
 
-    padding: 20,
-    borderRadius: 20,
+    padding: 22,
+    borderRadius: 24,
+
     borderWidth: 1,
     borderColor: COLORS.border,
   },
 
   label: {
     color: COLORS.text,
-    marginBottom: 6,
-    marginTop: 10,
+    marginBottom: 8,
+    marginTop: 14,
+    fontSize: 14,
+    fontWeight: "600",
   },
 
   input: {
-    backgroundColor: "#111",
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor:
+      COLORS.background,
+    padding: 14,
+    borderRadius: 14,
     color: COLORS.text,
     borderWidth: 1,
     borderColor: COLORS.border,
+    fontSize: 14,
   },
 
   btn: {
     backgroundColor:
       COLORS.primary,
 
-    padding: 15,
-    borderRadius: 15,
-    marginTop: 20,
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 24,
     alignItems: "center",
   },
 
   btnText: {
     color: "#fff",
     fontWeight: "bold",
+    fontSize: 14,
   },
 
   link: {
     color: COLORS.gray,
-    marginTop: 15,
+    marginTop: 20,
     textAlign: "center",
+    fontSize: 13,
   },
 
   linkBold: {

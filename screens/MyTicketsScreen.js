@@ -1,128 +1,191 @@
 import React, { useState } from "react";
+
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
+  Image,
   ScrollView,
 } from "react-native";
 
 import { useTickets } from "../context/TicketContext";
 
+import { COLORS } from "../utils/colors";
+
 const MyTicketsScreen = ({ navigation }) => {
   const [tab, setTab] = useState("upcoming");
 
-  // ✅ Global tickets từ Context API
   const { tickets } = useTickets();
+
+  // ─── PHÂN LOẠI VÉ ───────────────────────────────────────────────
+  // Upcoming: movieDate còn trong tương lai
+  // Used:     movieDate đã qua
+  const now = new Date();
+
+  const upcomingTickets = tickets.filter(
+    (t) => t.movieDate && new Date(t.movieDate) > now
+  );
+
+  const usedTickets = tickets.filter(
+    (t) => !t.movieDate || new Date(t.movieDate) <= now
+  );
+
+  // Danh sách hiển thị theo tab đang chọn
+  const displayTickets =
+    tab === "upcoming" ? upcomingTickets : usedTickets;
+
+  // ─── BADGE theo loại vé ─────────────────────────────────────────
+  const TicketBadge = ({ ticket }) => {
+    const isUpcoming =
+      ticket.movieDate && new Date(ticket.movieDate) > now;
+
+    return isUpcoming ? (
+      // Vé sắp chiếu — xanh lá
+      <View style={styles.badgeUpcoming}>
+        <Text style={styles.badgeUpcomingText}>🎬 UPCOMING</Text>
+      </View>
+    ) : (
+      // Vé đã chiếu — xám
+      <View style={styles.badgeUsed}>
+        <Text style={styles.badgeUsedText}>✓ USED</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* HEADER */}
+        {/* ── HEADER ─────────────────────────────────────── */}
         <View style={styles.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>My Tickets</Text>
-
-            <Text style={styles.subtitle}>
-              Your movie booking history
-            </Text>
-          </View>
+          <Text style={styles.title}>My Tickets</Text>
+          <Text style={styles.subtitle}>Your movie bookings</Text>
         </View>
 
-        {/* TABS */}
+        {/* ── TABS ───────────────────────────────────────── */}
         <View style={styles.tabs}>
+          {/* Tab Upcoming */}
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              tab === "upcoming" && styles.activeTab,
-            ]}
+            style={[styles.tabBtn, tab === "upcoming" && styles.activeTab]}
             onPress={() => setTab("upcoming")}
+            activeOpacity={0.8}
           >
             <Text
-              style={
-                tab === "upcoming"
-                  ? styles.activeText
-                  : styles.tabText
-              }
+              style={tab === "upcoming" ? styles.activeText : styles.tabText}
             >
-              Upcoming
+              {`Upcoming${upcomingTickets.length > 0 ? "  (" + upcomingTickets.length + ")" : ""}`}
             </Text>
           </TouchableOpacity>
 
+          {/* Tab Used */}
           <TouchableOpacity
-            style={[
-              styles.tabBtn,
-              tab === "used" && styles.activeTab,
-            ]}
+            style={[styles.tabBtn, tab === "used" && styles.activeTabUsed]}
             onPress={() => setTab("used")}
+            activeOpacity={0.8}
           >
-            <Text
-              style={
-                tab === "used"
-                  ? styles.activeText
-                  : styles.tabText
-              }
-            >
-              Used
+            <Text style={tab === "used" ? styles.activeText : styles.tabText}>
+              {`Used${usedTickets.length > 0 ? "  (" + usedTickets.length + ")" : ""}`}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* UPCOMING */}
-        {tab === "upcoming" ? (
-          <View style={styles.list}>
-            {tickets.length === 0 ? (
-              <View style={styles.emptyBox}>
-                <Text style={styles.emptyIcon}>🎬</Text>
+        {/* ── EMPTY STATE ────────────────────────────────── */}
+        {displayTickets.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyIcon}>
+              {tab === "upcoming" ? "🎟️" : "🎬"}
+            </Text>
 
-                <Text style={styles.emptyTitle}>
-                  No Tickets Yet
-                </Text>
+            <Text style={styles.emptyTitle}>
+              {tab === "upcoming"
+                ? "No Upcoming Tickets"
+                : "No Used Tickets"}
+            </Text>
 
-                <Text style={styles.emptySub}>
-                  Book your first movie ticket now
-                </Text>
+            <Text style={styles.emptySub}>
+              {tab === "upcoming"
+                ? "Book a movie to see your upcoming tickets here"
+                : "Tickets that have passed will appear here"}
+            </Text>
 
-                <TouchableOpacity
-                  style={styles.bookBtn}
-                  onPress={() =>
-                    navigation.navigate("Home")
-                  }
-                >
-                  <Text style={styles.bookBtnText}>
-                    Browse Movies
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              tickets.map((ticket, i) => (
-                <TicketCard
-                  key={ticket.id || i}
-                  item={{
-                    name: ticket.movie?.name || "Movie",
-                    cinema: "Cinema 1",
-                    format: "IMAX",
-                    date: ticket.date,
-                    time: ticket.time,
-                    seats: ticket.seats
-                      ?.map((s) => s.id)
-                      .join(", "),
-                    price: `Rp ${ticket.total.toLocaleString()}`,
-                    code: `TKM-${ticket.id}`,
-                    img:
-                      ticket.movie?.img ||
-                      require("../assets/img/spider_man.jpg"),
-                  }}
-                />
-              ))
+            {/* Chỉ hiện nút Browse khi ở tab upcoming */}
+            {tab === "upcoming" && (
+              <TouchableOpacity
+                style={styles.bookBtn}
+                onPress={() =>
+                  navigation.navigate("HomeTab", { screen: "Home" })
+                }
+                activeOpacity={0.85}
+              >
+                <Text style={styles.bookText}>Browse Movies</Text>
+              </TouchableOpacity>
             )}
           </View>
         ) : (
-          <Used />
+          /* ── DANH SÁCH VÉ ─────────────────────────────── */
+          <View style={styles.list}>
+            {displayTickets.map((ticket, index) => (
+              <TouchableOpacity
+                key={ticket.id || index}
+                style={[
+                  styles.card,
+                  // Viền xanh lá cho upcoming, xám cho used
+                  tab === "upcoming"
+                    ? styles.cardUpcoming
+                    : styles.cardUsed,
+                ]}
+                activeOpacity={0.9}
+              >
+                {/* Ảnh poster — mờ nếu là vé đã dùng */}
+                <Image
+                  source={ticket.movie?.img}
+                  style={[
+                    styles.poster,
+                    tab === "used" && styles.posterUsed,
+                  ]}
+                  resizeMode="cover"
+                />
+
+                <View style={styles.info}>
+                  {/* Tên phim */}
+                  <Text numberOfLines={1} style={styles.movie}>
+                    {ticket.movie?.name}
+                  </Text>
+
+                  {/* Ngày chiếu */}
+                  <Text style={styles.gray}>📅 {ticket.date || "—"}</Text>
+
+                  {/* Giờ chiếu */}
+                  <Text style={styles.gray}>🕐 {ticket.time || "19:45"}</Text>
+
+                  {/* Ghế */}
+                  <Text style={styles.gray}>
+                    🎟 {ticket.seats?.map((s) => s.id).join(", ")}
+                  </Text>
+
+                  {/* Tổng tiền */}
+                  <Text style={styles.gray}>
+                    💰 Rp {ticket.total?.toLocaleString()}
+                  </Text>
+
+                  {/* Badge + nút Details */}
+                  <View style={styles.bottomRow}>
+                    <TicketBadge ticket={ticket} />
+
+                    <TouchableOpacity
+                      style={styles.detailBtn}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.detailText}>Details</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         )}
       </ScrollView>
     </View>
@@ -131,137 +194,13 @@ const MyTicketsScreen = ({ navigation }) => {
 
 export default MyTicketsScreen;
 
-//////////////////// TICKET CARD ////////////////////
-
-const TicketCard = ({ item, used }) => (
-  <View style={styles.card}>
-    {/* TOP */}
-    <View style={styles.top}>
-      <Image source={item.img} style={styles.poster} />
-
-      <View style={styles.info}>
-        <View style={styles.rowBetween}>
-          <Text
-            style={styles.movie}
-            numberOfLines={2}
-          >
-            {item.name}
-          </Text>
-
-          <Text
-            style={[
-              styles.badge,
-              used
-                ? styles.usedBadge
-                : styles.upcomingBadge,
-            ]}
-          >
-            {used ? "USED" : "UPCOMING"}
-          </Text>
-        </View>
-
-        <Text style={styles.gray}>
-          {item.cinema}
-        </Text>
-
-        <View style={styles.format}>
-          <Text style={styles.formatText}>
-            {item.format}
-          </Text>
-        </View>
-      </View>
-    </View>
-
-    {/* DIVIDER */}
-    <View style={styles.divider} />
-
-    {/* BOTTOM */}
-    <View style={styles.bottom}>
-      <View>
-        <Text style={styles.gray}>
-          📅 {item.date}
-        </Text>
-
-        <Text style={styles.gray}>
-          🕒 {item.time}
-        </Text>
-      </View>
-
-      <View style={{ alignItems: "flex-end" }}>
-        <Text style={styles.seatText}>
-          Seats: {item.seats}
-        </Text>
-
-        <Text style={styles.price}>
-          {item.price}
-        </Text>
-      </View>
-    </View>
-
-    {/* BARCODE */}
-    {!used && (
-      <View style={styles.barcode}>
-        <Text style={styles.barcodeText}>
-          {item.code}
-        </Text>
-      </View>
-    )}
-  </View>
-);
-
-//////////////////// USED DATA ////////////////////
-
-const usedData = [
-  {
-    name: "Dune: Messiah",
-    cinema: "CGV Blitz Megamall",
-    format: "4DX",
-    date: "Sun, 20 Apr 2025",
-    time: "13:15",
-    seats: "F5",
-    price: "Rp 90.000",
-    img: {
-      uri: "https://i.imgur.com/6oKXkYp.png",
-    },
-  },
-  {
-    name: "The Dark Forest",
-    cinema: "XXI Yogyakarta",
-    format: "Regular",
-    date: "Fri, 11 Apr 2025",
-    time: "21:00",
-    seats: "B2, B3, B4",
-    price: "Rp 150.000",
-    img: {
-      uri: "https://i.imgur.com/8zQ6F7Q.png",
-    },
-  },
-];
-
-//////////////////// USED LIST ////////////////////
-
-const Used = () => (
-  <View style={styles.list}>
-    {usedData.map((item, i) => (
-      <TicketCard
-        key={i}
-        item={item}
-        used
-      />
-    ))}
-  </View>
-);
-
-//////////////////// STYLES ////////////////////
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor: COLORS.background,
   },
 
-  ////////////////// HEADER //////////////////
-
+  // ── HEADER ──────────────────────────────────────────
   header: {
     paddingHorizontal: 20,
     paddingTop: 20,
@@ -269,42 +208,49 @@ const styles = StyleSheet.create({
   },
 
   title: {
+    color: COLORS.text,
     fontSize: 28,
-    color: "#fff",
     fontWeight: "bold",
   },
 
   subtitle: {
-    color: "#888",
-    marginTop: 6,
+    color: COLORS.gray,
+    marginTop: 5,
     fontSize: 14,
   },
 
-  ////////////////// TABS //////////////////
-
+  // ── TABS ────────────────────────────────────────────
   tabs: {
     flexDirection: "row",
+    backgroundColor: COLORS.card,
     marginHorizontal: 20,
-    marginTop: 15,
-    backgroundColor: "#1e1e1e",
+    marginTop: 10,
     borderRadius: 30,
     padding: 5,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 
   tabBtn: {
     flex: 1,
     paddingVertical: 12,
-    alignItems: "center",
     borderRadius: 25,
+    alignItems: "center",
   },
 
+  // Tab Upcoming active — màu cam chính
   activeTab: {
-    backgroundColor: "#ff6b35",
+    backgroundColor: COLORS.primary,
+  },
+
+  // Tab Used active — xám tối
+  activeTabUsed: {
+    backgroundColor: "#555",
   },
 
   tabText: {
-    color: "#888",
-    fontWeight: "500",
+    color: COLORS.gray,
+    fontWeight: "600",
   },
 
   activeText: {
@@ -312,179 +258,152 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  ////////////////// LIST //////////////////
-
+  // ── CARD ────────────────────────────────────────────
   list: {
     padding: 20,
-    gap: 20,
   },
-
-  ////////////////// CARD //////////////////
 
   card: {
-    backgroundColor: "#1c1c1e",
+    flexDirection: "row",
+    backgroundColor: COLORS.card,
     borderRadius: 24,
-    padding: 15,
+    padding: 14,
+    marginBottom: 18,
     borderWidth: 1,
-    borderColor: "#2b2b2b",
   },
 
-  top: {
-    flexDirection: "row",
+  // Viền xanh lá nhạt cho vé sắp chiếu
+  cardUpcoming: {
+    borderColor: "rgba(74,222,128,0.35)",
+  },
+
+  // Viền xám cho vé đã dùng
+  cardUsed: {
+    borderColor: COLORS.border,
   },
 
   poster: {
-    width: 80,
-    height: 110,
-    borderRadius: 14,
-    marginRight: 14,
+    width: 95,
+    height: 140,
+    borderRadius: 18,
+  },
+
+  // Poster mờ khi vé đã dùng
+  posterUsed: {
+    opacity: 0.4,
   },
 
   info: {
     flex: 1,
+    marginLeft: 15,
     justifyContent: "space-between",
-  },
-
-  rowBetween: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
   },
 
   movie: {
-    flex: 1,
-    color: "#fff",
+    color: COLORS.text,
     fontSize: 16,
     fontWeight: "bold",
-    marginRight: 10,
+    marginBottom: 2,
   },
 
   gray: {
-    color: "#aaa",
-    fontSize: 13,
-    marginTop: 4,
-  },
-
-  ////////////////// FORMAT //////////////////
-
-  format: {
-    marginTop: 10,
-    backgroundColor: "#3a2015",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-  },
-
-  formatText: {
-    color: "#ff8a65",
-    fontWeight: "600",
+    color: COLORS.gray,
+    marginTop: 5,
     fontSize: 12,
+    lineHeight: 18,
   },
 
-  ////////////////// BADGE //////////////////
-
-  badge: {
-    fontSize: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 6,
-    overflow: "hidden",
-    fontWeight: "bold",
-  },
-
-  upcomingBadge: {
-    backgroundColor: "#113320",
-    color: "#34c759",
-  },
-
-  usedBadge: {
-    backgroundColor: "#2c2c2e",
-    color: "#aaa",
-  },
-
-  ////////////////// DIVIDER //////////////////
-
-  divider: {
-    height: 1,
-    backgroundColor: "#333",
-    marginVertical: 15,
-  },
-
-  ////////////////// BOTTOM //////////////////
-
-  bottom: {
+  bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 10,
   },
 
-  seatText: {
-    color: "#888",
+  // ── BADGE UPCOMING ──────────────────────────────────
+  badgeUpcoming: {
+    backgroundColor: "rgba(74,222,128,0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(74,222,128,0.3)",
+  },
+
+  badgeUpcomingText: {
+    color: "#4ade80",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+
+  // ── BADGE USED ──────────────────────────────────────
+  badgeUsed: {
+    backgroundColor: "rgba(150,150,150,0.12)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(150,150,150,0.2)",
+  },
+
+  badgeUsedText: {
+    color: "#999",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+
+  // ── DETAIL BUTTON ────────────────────────────────────
+  detailBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+
+  detailText: {
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 12,
   },
 
-  price: {
-    color: "#ff6b35",
-    fontWeight: "bold",
-    fontSize: 15,
-    marginTop: 5,
-  },
-
-  ////////////////// BARCODE //////////////////
-
-  barcode: {
-    marginTop: 18,
-    backgroundColor: "#fff",
-    paddingVertical: 12,
-    borderRadius: 12,
+  // ── EMPTY STATE ──────────────────────────────────────
+  empty: {
+    marginTop: 100,
     alignItems: "center",
-  },
-
-  barcodeText: {
-    color: "#000",
-    fontWeight: "bold",
-    letterSpacing: 2,
-  },
-
-  ////////////////// EMPTY //////////////////
-
-  emptyBox: {
-    marginTop: 80,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
   },
 
   emptyIcon: {
-    fontSize: 70,
-    marginBottom: 15,
+    fontSize: 65,
   },
 
   emptyTitle: {
-    color: "#fff",
+    color: COLORS.text,
     fontSize: 22,
     fontWeight: "bold",
+    marginTop: 20,
+    textAlign: "center",
   },
 
   emptySub: {
-    color: "#888",
+    color: COLORS.gray,
     marginTop: 10,
+    fontSize: 13,
     textAlign: "center",
-    lineHeight: 22,
+    lineHeight: 20,
   },
 
   bookBtn: {
-    marginTop: 30,
-    backgroundColor: "#ff6b35",
+    marginTop: 28,
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 28,
     paddingVertical: 15,
     borderRadius: 30,
   },
 
-  bookBtnText: {
+  bookText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 15,
+    fontSize: 14,
   },
 });

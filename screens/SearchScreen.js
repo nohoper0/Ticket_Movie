@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState }
+from "react";
+
 import {
   View,
   Text,
@@ -7,83 +9,172 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  ScrollView
+  ScrollView,
 } from "react-native";
 
 import movies from "../data";
 
-export default function SearchScreen({ navigation }) {
-  const [keyword, setKeyword] = useState("");
-  const [activeCat, setActiveCat] = useState("All");
+import { COLORS }
+from "../utils/colors";
 
-  const categories = ["All", "Action", "Sci-Fi", "Horror", "Drama"];
+export default function SearchScreen({
+  navigation,
+}) {
+  const [keyword, setKeyword] =
+    useState("");
 
-  const filtered = movies.filter((m) => {
-    const matchName = m.name.toLowerCase().includes(keyword.toLowerCase());
-    const matchCat = activeCat === "All" || m.genre.includes(activeCat);
-    return matchName && matchCat;
-  });
+  const [activeCat, setActiveCat] =
+    useState("All");
+
+  const categories = [
+    "All",
+    "Action",
+    "Sci-Fi",
+    "Horror",
+    "Drama",
+    "Adventure",
+    "Animation",
+    "Family",
+    "Crime",
+  ];
+
+  const filtered = movies.filter(
+    (m) => {
+      const matchName =
+        m.name
+          .toLowerCase()
+          .includes(
+            keyword.toLowerCase()
+          );
+
+      const matchCat =
+        activeCat === "All" ||
+        m.genre.includes(activeCat);
+
+      return matchName && matchCat;
+    }
+  );
 
   const renderItem = ({ item }) => (
-    // ✅ SearchScreen là tab screen, cần navigate qua HomeTab rồi mới đến Detail
     <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.8}
       onPress={() =>
-        navigation.navigate("HomeTab", {
-          screen: "Detail",
-          params: { movie: item },
-        })
+        navigation.navigate(
+          "Detail",
+          { movie: item }
+        )
       }
     >
-      <View style={styles.card}>
-        <Image source={item.img} style={styles.image} />
-        <Text style={styles.rating}>⭐ {item.rating}</Text>
-        <Text style={styles.title}>{item.name}</Text>
-        <Text style={styles.genre}>{item.genre}</Text>
-      </View>
+      <Image
+        source={item.img}
+        style={styles.image}
+        resizeMode="cover"
+      />
+
+      <Text style={styles.rating}>
+        ⭐ {item.rating}
+      </Text>
+
+      <Text
+        style={styles.title}
+        numberOfLines={1}
+      >
+        {item.name}
+      </Text>
+
+      <Text
+        style={styles.genre}
+        numberOfLines={1}
+      >
+        {item.genre}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView
+        showsVerticalScrollIndicator={
+          false
+        }
+      >
+        <Text style={styles.h1}>
+          Search
+        </Text>
 
-        <Text style={styles.h1}>Search</Text>
-        <Text style={styles.subtitle}>Find your favorite movies</Text>
+        <Text style={styles.subtitle}>
+          Find your favorite movies
+        </Text>
 
         <View style={styles.searchBar}>
-          <Text>🔍</Text>
+          <Text
+            style={{ color: "#fff" }}
+          >
+            🔍
+          </Text>
+
           <TextInput
-            placeholder="Search movies, genres..."
-            placeholderTextColor="#aaa"
+            placeholder="Search movies..."
+            placeholderTextColor={
+              COLORS.gray
+            }
             style={styles.input}
             value={keyword}
             onChangeText={setKeyword}
           />
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={
+            false
+          }
+          style={{ marginBottom: 10 }}
+        >
           {categories.map((cat) => (
             <TouchableOpacity
               key={cat}
-              style={[styles.cat, activeCat === cat && styles.activeCat]}
-              onPress={() => setActiveCat(cat)}
+              style={[
+                styles.cat,
+
+                activeCat === cat &&
+                  styles.activeCat,
+              ]}
+              onPress={() =>
+                setActiveCat(cat)
+              }
             >
-              <Text style={{ color: activeCat === cat ? "#fff" : "#aaa" }}>
+              <Text
+                style={{
+                  color:
+                    activeCat === cat
+                      ? "#fff"
+                      : COLORS.gray,
+                }}
+              >
                 {cat}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <Text style={styles.resultText}>{filtered.length} results found</Text>
+        <Text style={styles.resultText}>
+          {filtered.length} results
+          found
+        </Text>
 
         <FlatList
           data={filtered}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) =>
+            item.id.toString()
+          }
           numColumns={2}
           scrollEnabled={false}
-          contentContainerStyle={{ marginTop: 10 }}
+          contentContainerStyle={{
+            paddingBottom: 100,
+          }}
         />
       </ScrollView>
     </View>
@@ -91,17 +182,122 @@ export default function SearchScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0d0d0d", padding: 20 },
-  h1: { fontSize: 22, fontWeight: "bold", color: "#fff" },
-  subtitle: { color: "#aaa", marginBottom: 15 },
-  searchBar: { backgroundColor: "#1c1c1c", padding: 12, borderRadius: 15, flexDirection: "row", alignItems: "center", marginBottom: 15 },
-  input: { marginLeft: 10, color: "#fff", flex: 1 },
-  cat: { paddingVertical: 8, paddingHorizontal: 15, borderRadius: 20, backgroundColor: "#1c1c1c", marginRight: 10 },
-  activeCat: { backgroundColor: "#ff6b2c" },
-  resultText: { color: "#aaa", fontSize: 14 },
-  card: { flex: 1, backgroundColor: "#1c1c1c", borderRadius: 15, padding: 10, margin: 5 },
-  image: { width: "100%", height: 120, borderRadius: 10 },
-  rating: { color: "gold", marginTop: 5, fontSize: 13 },
-  title: { fontWeight: "bold", color: "#fff", marginTop: 5 },
-  genre: { fontSize: 12, color: "#aaa" }
+  container: {
+    flex: 1,
+
+    backgroundColor:
+      COLORS.background,
+
+    padding: 20,
+  },
+
+  h1: {
+    color: "#fff",
+
+    fontSize: 28,
+
+    fontWeight: "bold",
+  },
+
+  subtitle: {
+    color: COLORS.gray,
+
+    marginTop: 5,
+
+    marginBottom: 20,
+  },
+
+  searchBar: {
+    backgroundColor:
+      COLORS.card,
+
+    borderRadius: 18,
+
+    paddingHorizontal: 15,
+
+    paddingVertical: 14,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    marginBottom: 20,
+  },
+
+  input: {
+    marginLeft: 10,
+
+    flex: 1,
+
+    color: "#fff",
+  },
+
+  cat: {
+    backgroundColor:
+      COLORS.card,
+
+    paddingHorizontal: 18,
+
+    paddingVertical: 10,
+
+    borderRadius: 30,
+
+    marginRight: 10,
+  },
+
+  activeCat: {
+    backgroundColor:
+      COLORS.primary,
+  },
+
+  resultText: {
+    color: COLORS.gray,
+
+    marginBottom: 15,
+  },
+
+  card: {
+    flex: 1,
+
+    backgroundColor:
+      COLORS.card,
+
+    margin: 6,
+
+    borderRadius: 20,
+
+    padding: 10,
+  },
+
+  image: {
+    width: "100%",
+
+    height: 220,
+
+    borderRadius: 15,
+  },
+
+  rating: {
+    color: "#facc15",
+
+    marginTop: 8,
+
+    fontSize: 12,
+  },
+
+  title: {
+    color: "#fff",
+
+    fontWeight: "bold",
+
+    marginTop: 5,
+  },
+
+  genre: {
+    color: COLORS.gray,
+
+    marginTop: 3,
+
+    fontSize: 12,
+  },
 });
