@@ -1,19 +1,23 @@
 import React, { useState } from "react";
+
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  Alert
 } from "react-native";
 
+const MAX_SEATS = 8;
+
 const SeatSelectionScreen = ({ navigation, route }) => {
-  // Nhận movie được truyền từ MovieDetailScreen
+  // ✅ Nhận movie từ MovieDetailScreen
   const { movie } = route.params || {};
 
-  // 🔥 DATA GHẾ
+  // 🎬 DATA GHẾ
   const [seats, setSeats] = useState([
-    // Hàng A
+    // A
     { id: "A1", row: "A", num: 1, type: "unavailable" },
     { id: "A2", row: "A", num: 2, type: "unavailable" },
     { id: "A3", row: "A", num: 3, type: "normal" },
@@ -23,7 +27,7 @@ const SeatSelectionScreen = ({ navigation, route }) => {
     { id: "A7", row: "A", num: 7, type: "normal" },
     { id: "A8", row: "A", num: 8, type: "vip" },
 
-    // Hàng B
+    // B
     { id: "B1", row: "B", num: 1, type: "normal" },
     { id: "B2", row: "B", num: 2, type: "normal" },
     { id: "B3", row: "B", num: 3, type: "unavailable" },
@@ -33,7 +37,7 @@ const SeatSelectionScreen = ({ navigation, route }) => {
     { id: "B7", row: "B", num: 7, type: "unavailable" },
     { id: "B8", row: "B", num: 8, type: "unavailable" },
 
-    // Hàng C
+    // C
     { id: "C1", row: "C", num: 1, type: "normal" },
     { id: "C2", row: "C", num: 2, type: "normal" },
     { id: "C3", row: "C", num: 3, type: "normal" },
@@ -43,7 +47,7 @@ const SeatSelectionScreen = ({ navigation, route }) => {
     { id: "C7", row: "C", num: 7, type: "normal" },
     { id: "C8", row: "C", num: 8, type: "normal" },
 
-    // Hàng D
+    // D
     { id: "D1", row: "D", num: 1, type: "unavailable" },
     { id: "D2", row: "D", num: 2, type: "normal" },
     { id: "D3", row: "D", num: 3, type: "normal" },
@@ -53,7 +57,7 @@ const SeatSelectionScreen = ({ navigation, route }) => {
     { id: "D7", row: "D", num: 7, type: "vip" },
     { id: "D8", row: "D", num: 8, type: "unavailable" },
 
-    // Hàng E
+    // E
     { id: "E1", row: "E", num: 1, type: "normal" },
     { id: "E2", row: "E", num: 2, type: "normal" },
     { id: "E3", row: "E", num: 3, type: "normal" },
@@ -63,7 +67,7 @@ const SeatSelectionScreen = ({ navigation, route }) => {
     { id: "E7", row: "E", num: 7, type: "vip" },
     { id: "E8", row: "E", num: 8, type: "normal" },
 
-    // Hàng F
+    // F
     { id: "F1", row: "F", num: 1, type: "vip" },
     { id: "F2", row: "F", num: 2, type: "normal" },
     { id: "F3", row: "F", num: 3, type: "unavailable" },
@@ -73,7 +77,7 @@ const SeatSelectionScreen = ({ navigation, route }) => {
     { id: "F7", row: "F", num: 7, type: "normal" },
     { id: "F8", row: "F", num: 8, type: "vip" },
 
-    // Hàng G
+    // G
     { id: "G1", row: "G", num: 1, type: "unavailable" },
     { id: "G2", row: "G", num: 2, type: "unavailable" },
     { id: "G3", row: "G", num: 3, type: "normal" },
@@ -84,42 +88,100 @@ const SeatSelectionScreen = ({ navigation, route }) => {
     { id: "G8", row: "G", num: 8, type: "unavailable" },
   ]);
 
-  // 🎯 TOGGLE GHẾ
+  // 🎯 GHẾ ĐÃ CHỌN
+  const selectedSeats = seats.filter(
+    (s) => s.selected
+  );
+
+  // 🎯 TOGGLE SEAT + FIX MAX 8
   const toggleSeat = (id) => {
+    const targetSeat = seats.find(
+      (s) => s.id === id
+    );
+
+    if (!targetSeat) return;
+
+    // ❌ Không cho chọn ghế unavailable
+    if (targetSeat.type === "unavailable") {
+      return;
+    }
+
+    // ❌ Giới hạn tối đa 8 ghế
+    if (
+      !targetSeat.selected &&
+      selectedSeats.length >= MAX_SEATS
+    ) {
+      Alert.alert(
+        "Limit Reached",
+        `You can only select up to ${MAX_SEATS} seats`
+      );
+
+      return;
+    }
+
     setSeats((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, selected: !s.selected } : s
+      prev.map((seat) =>
+        seat.id === id
+          ? {
+              ...seat,
+              selected: !seat.selected,
+            }
+          : seat
       )
     );
   };
 
-  // 💰 TÍNH TIỀN
+  // 💰 PRICE
   const vipPrice = 85000;
   const normalPrice = 50000;
 
-  const selectedSeats = seats.filter((s) => s.selected);
+  // 💰 TOTAL
+  const total = selectedSeats.reduce(
+    (sum, seat) =>
+      sum +
+      (seat.type === "vip"
+        ? vipPrice
+        : normalPrice),
+    0
+  );
 
-  const total = selectedSeats.reduce((sum, s) => {
-    return sum + (s.type === "vip" ? vipPrice : normalPrice);
-  }, 0);
+  // 🎬 ROWS
+  const rows = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+  ];
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+      >
         {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backBtn}
-            onPress={() => navigation.goBack()}
+            onPress={() =>
+              navigation.goBack()
+            }
           >
-            <Text style={{ color: "#fff" }}>←</Text>
+            <Text style={styles.backText}>
+              ←
+            </Text>
           </TouchableOpacity>
 
           <View>
-            <Text style={styles.title}>Select Seats</Text>
+            <Text style={styles.title}>
+              Select Seats
+            </Text>
+
             <Text style={styles.sub}>
-              Cinema 1 • Sat, 10 May • 19:45
+              Cinema 1 • Sat, 10 May •
+              19:45
             </Text>
           </View>
         </View>
@@ -127,41 +189,72 @@ const SeatSelectionScreen = ({ navigation, route }) => {
         {/* SCREEN */}
         <View style={styles.screenBox}>
           <View style={styles.screenGlow} />
-          <Text style={styles.screenText}>SCREEN</Text>
+
+          <Text style={styles.screenText}>
+            SCREEN
+          </Text>
         </View>
 
-        {/* SEATS */}
+        {/* SEAT AREA */}
         <View style={styles.seatArea}>
-          {["A", "B", "C", "D", "E", "F", "G"].map((row) => (
-            <View key={row} style={styles.row}>
-              <Text style={styles.rowLabel}>{row}</Text>
+          {rows.map((row) => (
+            <View
+              key={row}
+              style={styles.row}
+            >
+              <Text style={styles.rowLabel}>
+                {row}
+              </Text>
 
               <View style={styles.seatRow}>
                 {seats
-                  .filter((s) => s.row === row)
+                  .filter(
+                    (seat) =>
+                      seat.row === row
+                  )
                   .map((seat) => (
                     <TouchableOpacity
                       key={seat.id}
                       style={[
                         styles.seat,
-                        seat.type === "vip" && styles.vip,
+
+                        seat.type ===
+                          "vip" &&
+                          styles.vip,
+
+                        seat.type ===
+                          "unavailable" &&
+                          styles.unavailable,
+
                         seat.selected &&
-                          (seat.type === "vip"
-                            ? styles.vipSelected
-                            : styles.selected),
-                        seat.type === "unavailable" && styles.unavailable
+                          seat.type ===
+                            "normal" &&
+                          styles.selected,
+
+                        seat.selected &&
+                          seat.type ===
+                            "vip" &&
+                          styles.vipSelected,
                       ]}
-                      onPress={() => {
-                        if (seat.type !== "unavailable") toggleSeat(seat.id);
-                      }}
+                      onPress={() =>
+                        toggleSeat(seat.id)
+                      }
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.seatText}>{seat.num}</Text>
+                      <Text
+                        style={
+                          styles.seatText
+                        }
+                      >
+                        {seat.num}
+                      </Text>
                     </TouchableOpacity>
                   ))}
               </View>
 
-              <Text style={styles.rowLabel}>{row}</Text>
+              <Text style={styles.rowLabel}>
+                {row}
+              </Text>
             </View>
           ))}
         </View>
@@ -169,59 +262,142 @@ const SeatSelectionScreen = ({ navigation, route }) => {
         {/* LEGEND */}
         <View style={styles.legend}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendBox, { backgroundColor: "#222232" }]} />
-            <Text style={styles.legendText}>Available</Text>
+            <View
+              style={[
+                styles.legendBox,
+                {
+                  backgroundColor:
+                    "#222232",
+                },
+              ]}
+            />
+
+            <Text style={styles.legendText}>
+              Available
+            </Text>
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendBox, { backgroundColor: "#fb6e3b" }]} />
-            <Text style={styles.legendText}>Selected</Text>
+            <View
+              style={[
+                styles.legendBox,
+                {
+                  backgroundColor:
+                    "#fb6e3b",
+                },
+              ]}
+            />
+
+            <Text style={styles.legendText}>
+              Selected
+            </Text>
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendBox, { borderWidth: 1, borderColor: "#6358dc" }]} />
-            <Text style={styles.legendText}>VIP</Text>
+            <View
+              style={[
+                styles.legendBox,
+                {
+                  borderWidth: 1,
+                  borderColor:
+                    "#6358dc",
+                },
+              ]}
+            />
+
+            <Text style={styles.legendText}>
+              VIP
+            </Text>
           </View>
 
           <View style={styles.legendItem}>
-            <View style={[styles.legendBox, { backgroundColor: "#151515" }]} />
-            <Text style={styles.legendText}>Taken</Text>
+            <View
+              style={[
+                styles.legendBox,
+                {
+                  backgroundColor:
+                    "#151515",
+                },
+              ]}
+            />
+
+            <Text style={styles.legendText}>
+              Taken
+            </Text>
           </View>
         </View>
 
         {/* SUMMARY */}
         <View style={styles.summary}>
           <View style={styles.rowBetween}>
-            <Text style={styles.gray}>Selected Seats</Text>
-            <Text style={styles.whiteBold}>
-              {selectedSeats.map((s) => s.id).join(", ") || "-"}
+            <Text style={styles.gray}>
+              Selected Seats
+            </Text>
+
+            <Text
+              style={styles.whiteBold}
+            >
+              {selectedSeats.length > 0
+                ? selectedSeats
+                    .map((s) => s.id)
+                    .join(", ")
+                : "-"}
             </Text>
           </View>
 
           <View style={styles.rowBetween}>
             <Text style={styles.gray}>
-              Regular × {selectedSeats.filter((s) => s.type === "normal").length}
+              Regular ×{" "}
+              {
+                selectedSeats.filter(
+                  (s) =>
+                    s.type ===
+                    "normal"
+                ).length
+              }
             </Text>
-            <Text style={styles.whiteBold}>
-              Rp {normalPrice.toLocaleString()}
+
+            <Text
+              style={styles.whiteBold}
+            >
+              Rp{" "}
+              {normalPrice.toLocaleString()}
             </Text>
           </View>
 
           <View style={styles.rowBetween}>
             <Text style={styles.gray}>
-              VIP × {selectedSeats.filter((s) => s.type === "vip").length}
+              VIP ×{" "}
+              {
+                selectedSeats.filter(
+                  (s) =>
+                    s.type === "vip"
+                ).length
+              }
             </Text>
-            <Text style={styles.whiteBold}>
-              Rp {vipPrice.toLocaleString()}
+
+            <Text
+              style={styles.whiteBold}
+            >
+              Rp{" "}
+              {vipPrice.toLocaleString()}
             </Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.totalRow}>
-            <Text style={styles.whiteBold}>Total</Text>
-            <Text style={styles.totalPrice}>
-              Rp {total.toLocaleString()}
+            <Text
+              style={styles.whiteBold}
+            >
+              Total
+            </Text>
+
+            <Text
+              style={styles.totalPrice}
+            >
+              Rp{" "}
+              {total.toLocaleString()}
             </Text>
           </View>
         </View>
@@ -231,19 +407,29 @@ const SeatSelectionScreen = ({ navigation, route }) => {
       <TouchableOpacity
         style={[
           styles.btn,
-          selectedSeats.length === 0 && { opacity: 0.5 }
+
+          selectedSeats.length ===
+            0 && {
+            opacity: 0.5,
+          },
         ]}
-        onPress={() =>
-          navigation.navigate("Checkout", {
-            selectedSeats: selectedSeats,
-            totalPrice: total,
-            movie: movie,       // ✅ Truyền movie sang Checkout
-          })
+        disabled={
+          selectedSeats.length === 0
         }
-        disabled={selectedSeats.length === 0}
+        onPress={() =>
+          navigation.navigate(
+            "Checkout",
+            {
+              selectedSeats,
+              totalPrice: total,
+              movie,
+            }
+          )
+        }
       >
         <Text style={styles.btnText}>
-          Continue — {selectedSeats.length} seats
+          Continue —{" "}
+          {selectedSeats.length} seats
         </Text>
       </TouchableOpacity>
     </View>
@@ -256,13 +442,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0d0d0d",
-    padding: 15
+    padding: 15,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    gap: 10,
   },
 
   backBtn: {
@@ -271,40 +457,67 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#222",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
 
-  title: { color: "#fff", fontWeight: "bold" },
-  sub: { color: "#888", fontSize: 12 },
+  backText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+
+  title: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+
+  sub: {
+    color: "#888",
+    fontSize: 12,
+    marginTop: 2,
+  },
 
   screenBox: {
     alignItems: "center",
-    marginVertical: 20
+    marginVertical: 25,
   },
 
   screenGlow: {
     width: "80%",
     height: 10,
     backgroundColor: "#fb6e3b",
-    borderRadius: 50
+    borderRadius: 50,
   },
 
-  screenText: { color: "#888", marginTop: 5 },
+  screenText: {
+    color: "#888",
+    marginTop: 5,
+    fontSize: 12,
+    letterSpacing: 1,
+  },
 
-  seatArea: { marginVertical: 10 },
+  seatArea: {
+    marginVertical: 10,
+  },
 
   row: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10
+    justifyContent:
+      "space-between",
+    marginBottom: 10,
   },
 
-  rowLabel: { color: "#888", width: 20 },
+  rowLabel: {
+    color: "#888",
+    width: 20,
+    fontWeight: "bold",
+  },
 
   seatRow: {
     flexDirection: "row",
-    gap: 6
+    gap: 6,
   },
 
   seat: {
@@ -313,89 +526,113 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: "#222232",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+  },
+
+  seatText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "600",
   },
 
   vip: {
     borderWidth: 1,
-    borderColor: "#6358dc"
+    borderColor: "#6358dc",
   },
 
   unavailable: {
     backgroundColor: "#151515",
-    opacity: 0.8
+    opacity: 0.8,
   },
 
   selected: {
-    backgroundColor: "#fb6e3b"
+    backgroundColor: "#fb6e3b",
   },
 
   vipSelected: {
-    backgroundColor: "#6358dc"
+    backgroundColor: "#6358dc",
   },
-
-  seatText: { color: "#fff", fontSize: 10 },
 
   legend: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 15
+    justifyContent:
+      "space-between",
+    marginVertical: 20,
+    flexWrap: "wrap",
+    rowGap: 10,
   },
 
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5
+    gap: 5,
   },
 
   legendBox: {
     width: 14,
     height: 14,
-    borderRadius: 3
+    borderRadius: 3,
   },
 
-  legendText: { color: "#888", fontSize: 12 },
+  legendText: {
+    color: "#888",
+    fontSize: 12,
+  },
 
   summary: {
     backgroundColor: "#1a1a1a",
     padding: 15,
     borderRadius: 15,
-    gap: 10
+    gap: 10,
+    marginBottom: 20,
   },
 
   rowBetween: {
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent:
+      "space-between",
+    alignItems: "center",
   },
 
-  gray: { color: "#888" },
-  whiteBold: { color: "#fff", fontWeight: "bold" },
+  gray: {
+    color: "#888",
+  },
+
+  whiteBold: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
 
   divider: {
     height: 1,
-    backgroundColor: "#333"
+    backgroundColor: "#333",
+    marginVertical: 5,
   },
 
   totalRow: {
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent:
+      "space-between",
+    alignItems: "center",
   },
 
   totalPrice: {
     color: "#fb6e3b",
-    fontWeight: "bold"
+    fontWeight: "bold",
+    fontSize: 18,
   },
 
   btn: {
     backgroundColor: "#fb6e3b",
-    padding: 15,
+    padding: 18,
     borderRadius: 20,
     alignItems: "center",
-    marginTop: 10
+    marginTop: 10,
   },
 
   btnText: {
     color: "#fff",
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+    fontSize: 15,
+  },
 });

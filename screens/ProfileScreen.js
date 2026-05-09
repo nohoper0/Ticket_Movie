@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   View,
   Text,
@@ -6,143 +7,400 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
-  Alert
+  Alert,
+  Image,
 } from "react-native";
-import { removeUser } from "../utils/storage";
 
-export default function ProfileScreen({ setIsLoggedIn }) {
-  const [notification, setNotification] = useState(true);
+import { useAuth } from "../context/AuthContext";
 
-  const handleLogout = async () => {
-    await removeUser();
-    Alert.alert("Logout", "Bạn đã đăng xuất!");
-    setIsLoggedIn(false);
+export default function ProfileScreen() {
+  const [notification, setNotification] =
+    useState(true);
+
+  const { user, logout } = useAuth();
+
+  // ✅ HANDLE LOGOUT
+  const handleLogout = () => {
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: logout,
+        },
+      ]
+    );
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-
+      <ScrollView
+        contentContainerStyle={
+          styles.scroll
+        }
+        showsVerticalScrollIndicator={
+          false
+        }
+      >
+        {/* HEADER */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <TouchableOpacity style={styles.editBtn}>
-            <Text style={{ color: "white" }}>✏️</Text>
-          </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            Profile
+          </Text>
+
+          <Text style={styles.headerSub}>
+            Manage your account
+          </Text>
         </View>
 
+        {/* PROFILE CARD */}
         <View style={styles.profileCard}>
-          <View style={styles.profileInfo}>
-            <View style={styles.avatar}>
-              <Text style={{ color: "white", fontWeight: "bold" }}>JD</Text>
-            </View>
-
-            <View>
-              <Text style={styles.name}>John Doe</Text>
-              <Text style={styles.email}>john.doe@email.com</Text>
-              <Text style={styles.gold}>⭐ Gold Member</Text>
-            </View>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {user?.name
+                ?.charAt(0)
+                ?.toUpperCase() || "U"}
+            </Text>
           </View>
 
-          <View style={styles.stats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>12</Text>
-              <Text style={styles.statLabel}>Tickets</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>5</Text>
-              <Text style={styles.statLabel}>Wishlist</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: "#ff6b35" }]}>
-                150K
-              </Text>
-              <Text style={styles.statLabel}>Points</Text>
-            </View>
+          <Text style={styles.name}>
+            {user?.name || "Guest User"}
+          </Text>
+
+          <Text style={styles.email}>
+            {user?.email ||
+              "guest@email.com"}
+          </Text>
+
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>
+              🎬 Movie Lover
+            </Text>
           </View>
         </View>
 
-        <View style={styles.wallet}>
-          <View>
-            <Text style={styles.gray}>TickMov Wallet</Text>
-            <Text style={styles.balance}>Rp 150.000</Text>
+        {/* ACCOUNT MENU */}
+        <View style={styles.menu}>
+          <View style={styles.menuItem}>
+            <View>
+              <Text
+                style={styles.menuTitle}
+              >
+                Notifications
+              </Text>
+
+              <Text
+                style={styles.menuSub}
+              >
+                Receive booking updates
+              </Text>
+            </View>
+
+            <Switch
+              value={notification}
+              onValueChange={
+                setNotification
+              }
+              trackColor={{
+                false: "#444",
+                true: "#ff6b35",
+              }}
+              thumbColor="#fff"
+            />
           </View>
-          <TouchableOpacity style={styles.topup}>
-            <Text style={{ color: "white" }}>Top Up</Text>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+          >
+            <View>
+              <Text
+                style={styles.menuTitle}
+              >
+                Payment Methods
+              </Text>
+
+              <Text
+                style={styles.menuSub}
+              >
+                Manage your wallet
+              </Text>
+            </View>
+
+            <Text style={styles.arrow}>
+              ›
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+          >
+            <View>
+              <Text
+                style={styles.menuTitle}
+              >
+                Booking History
+              </Text>
+
+              <Text
+                style={styles.menuSub}
+              >
+                View all movie tickets
+              </Text>
+            </View>
+
+            <Text style={styles.arrow}>
+              ›
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+          >
+            <View>
+              <Text
+                style={styles.menuTitle}
+              >
+                App Version
+              </Text>
+
+              <Text
+                style={styles.menuSub}
+              >
+                Ticket Movie v1.0.0
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.section}>ACCOUNT</Text>
-        <View style={styles.menu}>
-          <MenuItem title="My Tickets" subtitle="View all your bookings" />
-          <MenuItem title="Wishlist" subtitle="Movies you want to watch" />
+        {/* STATS */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              12
+            </Text>
 
-          <View style={styles.menuItem}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.menuTitle}>Notifications</Text>
-              <Text style={styles.menuSub}>Manage your alerts</Text>
-            </View>
-            <Switch value={notification} onValueChange={setNotification} />
+            <Text style={styles.statLabel}>
+              Movies Watched
+            </Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              4
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Upcoming
+            </Text>
           </View>
         </View>
 
-        <Text style={styles.section}>SETTINGS</Text>
-        <View style={styles.menu}>
-          <MenuItem title="Privacy & Security" subtitle="Account protection" />
-          <MenuItem title="Help & Support" subtitle="FAQ and contact us" />
-        </View>
-
-        <TouchableOpacity style={styles.signout} onPress={handleLogout}>
-          <Text style={{ color: "#ff5252", fontWeight: "bold" }}>
+        {/* SIGN OUT */}
+        <TouchableOpacity
+          style={styles.signout}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.signoutText}>
             Sign Out
           </Text>
         </TouchableOpacity>
 
+        {/* FOOTER */}
+        <Text style={styles.footer}>
+          Ticket Movie App
+        </Text>
       </ScrollView>
     </View>
   );
 }
 
-const MenuItem = ({ title, subtitle }) => (
-  <TouchableOpacity style={styles.menuItem}>
-    <View style={{ flex: 1 }}>
-      <Text style={styles.menuTitle}>{title}</Text>
-      <Text style={styles.menuSub}>{subtitle}</Text>
-    </View>
-    <Text style={{ color: "#888" }}>›</Text>
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212" },
-  scroll: { padding: 20, paddingBottom: 50 },
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+  },
 
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 },
-  headerTitle: { fontSize: 22, color: "white", fontWeight: "bold" },
-  editBtn: { backgroundColor: "#2c2c2e", padding: 10, borderRadius: 20 },
+  scroll: {
+    padding: 20,
+    paddingBottom: 40,
+  },
 
-  profileCard: { backgroundColor: "#271712", padding: 20, borderRadius: 20, marginBottom: 20 },
-  profileInfo: { flexDirection: "row", gap: 15 },
-  avatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: "#ff6b35", justifyContent: "center", alignItems: "center" },
-  name: { color: "white", fontSize: 16, fontWeight: "bold" },
-  email: { color: "#aaa", fontSize: 12 },
-  gold: { color: "#ffc107", fontSize: 12 },
+  ////////////////// HEADER //////////////////
 
-  stats: { flexDirection: "row", marginTop: 15, justifyContent: "space-between" },
-  statItem: { alignItems: "center" },
-  statValue: { color: "white", fontWeight: "bold" },
-  statLabel: { color: "#888", fontSize: 12 },
+  header: {
+    marginBottom: 10,
+  },
 
-  wallet: { backgroundColor: "#1c1c1e", padding: 20, borderRadius: 20, flexDirection: "row", justifyContent: "space-between", marginBottom: 20 },
-  gray: { color: "#888" },
-  balance: { color: "white", fontSize: 18, fontWeight: "bold" },
-  topup: { backgroundColor: "#ff6b35", paddingHorizontal: 15, paddingVertical: 10, borderRadius: 10 },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "bold",
+  },
 
-  section: { color: "#607d8b", marginBottom: 10, marginTop: 10 },
+  headerSub: {
+    color: "#888",
+    marginTop: 5,
+  },
 
-  menu: { backgroundColor: "#1c1c1e", borderRadius: 20, marginBottom: 20 },
-  menuItem: { padding: 15, borderBottomWidth: 1, borderBottomColor: "#333", flexDirection: "row", alignItems: "center" },
-  menuTitle: { color: "white", fontWeight: "600" },
-  menuSub: { color: "#888", fontSize: 12 },
+  ////////////////// PROFILE //////////////////
 
-  signout: { backgroundColor: "#2a1515", padding: 15, borderRadius: 20, alignItems: "center" },
+  profileCard: {
+    backgroundColor: "#1c1c1e",
+    padding: 25,
+    borderRadius: 25,
+    marginTop: 20,
+    alignItems: "center",
+  },
+
+  avatar: {
+    width: 85,
+    height: 85,
+    borderRadius: 42.5,
+    backgroundColor: "#ff6b35",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+
+  avatarText: {
+    color: "#fff",
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+
+  name: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+
+  email: {
+    color: "#aaa",
+    marginTop: 6,
+    fontSize: 14,
+  },
+
+  badge: {
+    marginTop: 15,
+    backgroundColor: "#2a1a14",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+
+  badgeText: {
+    color: "#ff8a65",
+    fontWeight: "600",
+  },
+
+  ////////////////// MENU //////////////////
+
+  menu: {
+    backgroundColor: "#1c1c1e",
+    borderRadius: 22,
+    marginTop: 25,
+    overflow: "hidden",
+  },
+
+  menuItem: {
+    padding: 18,
+    flexDirection: "row",
+    justifyContent:
+      "space-between",
+    alignItems: "center",
+  },
+
+  menuTitle: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  menuSub: {
+    color: "#888",
+    fontSize: 12,
+    marginTop: 4,
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#2c2c2e",
+    marginLeft: 18,
+  },
+
+  arrow: {
+    color: "#666",
+    fontSize: 22,
+  },
+
+  ////////////////// STATS //////////////////
+
+  statsContainer: {
+    flexDirection: "row",
+    gap: 15,
+    marginTop: 25,
+  },
+
+  statCard: {
+    flex: 1,
+    backgroundColor: "#1c1c1e",
+    padding: 20,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+
+  statNumber: {
+    color: "#ff6b35",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+
+  statLabel: {
+    color: "#888",
+    marginTop: 6,
+    fontSize: 12,
+  },
+
+  ////////////////// SIGN OUT //////////////////
+
+  signout: {
+    backgroundColor: "#2a1515",
+    padding: 18,
+    borderRadius: 20,
+    alignItems: "center",
+    marginTop: 30,
+    borderWidth: 1,
+    borderColor: "#4d1f1f",
+  },
+
+  signoutText: {
+    color: "#ff5252",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  ////////////////// FOOTER //////////////////
+
+  footer: {
+    textAlign: "center",
+    color: "#555",
+    marginTop: 25,
+    fontSize: 12,
+  },
 });

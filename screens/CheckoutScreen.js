@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
+ StyleSheet,
   TouchableOpacity,
   Image,
   TextInput,
@@ -12,130 +12,296 @@ import {
   Alert
 } from "react-native";
 
-const CheckoutScreen = ({ navigation, route }) => {
-  // ✅ Nhận thêm movie từ SeatSelectionScreen
-  const { selectedSeats = [], totalPrice = 0, movie } = route.params || {};
+import { useTickets } from "../context/TicketContext";
 
-  const [selectedPayment, setSelectedPayment] = useState("wallet");
+const CheckoutScreen = ({ navigation, route }) => {
+  const {
+    selectedSeats = [],
+    totalPrice = 0,
+    movie
+  } = route.params || {};
+
+  const { addTicket } = useTickets();
+
+  const [selectedPayment, setSelectedPayment] =
+    useState("wallet");
+
   const [promo, setPromo] = useState("");
 
+  // ✅ FIX DOUBLE CLICK
+  const [paying, setPaying] = useState(false);
+
   const payments = [
-    { id: "card", title: "Credit / Debit Card", desc: "Visa, Mastercard, JCB", icon: "💳" },
-    { id: "gopay", title: "GoPay", desc: "Scan QR to pay", icon: "📱" },
-    { id: "wallet", title: "TickMov Wallet", desc: "Balance: Rp 150.000", icon: "👛" },
-    { id: "ovo", title: "OVO", desc: "Pay with OVO balance", icon: "💎" }
+    {
+      id: "card",
+      title: "Credit / Debit Card",
+      desc: "Visa, Mastercard, JCB",
+      icon: "💳"
+    },
+    {
+      id: "gopay",
+      title: "GoPay",
+      desc: "Scan QR to pay",
+      icon: "📱"
+    },
+    {
+      id: "wallet",
+      title: "TickMov Wallet",
+      desc: "Balance: Rp 150.000",
+      icon: "👛"
+    },
+    {
+      id: "ovo",
+      title: "OVO",
+      desc: "Pay with OVO balance",
+      icon: "💎"
+    }
   ];
 
   const serviceFee = 5000;
+
   const grandTotal = totalPrice + serviceFee;
 
-  // ✅ Điều hướng đến BookingConfirmedScreen thay vì MyTickets
-  const handlePay = () => {
-    navigation.navigate("BookingConfirmed", {
-      selectedSeats,
-      totalPrice: grandTotal,
-      movie,
-    });
+  const handlePay = async () => {
+    // ✅ chống spam click
+    if (paying) return;
+
+    if (selectedSeats.length === 0) {
+      Alert.alert(
+        "Error",
+        "Please select seats first."
+      );
+
+      return;
+    }
+
+    try {
+      setPaying(true);
+
+      const newTicket = {
+        id: `${Date.now()}-${Math.random()}`,
+        movie,
+        seats: selectedSeats,
+        total: grandTotal,
+        time: "19:45",
+        date: "Sat, 10 May 2025",
+        paymentMethod: selectedPayment,
+        createdAt: new Date().toISOString()
+      };
+
+      // ✅ save ticket
+      await addTicket(newTicket);
+
+      navigation.navigate("BookingConfirmed", {
+        selectedSeats,
+        totalPrice: grandTotal,
+        movie
+      });
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Payment failed."
+      );
+
+      console.log(error);
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const handleApplyPromo = () => {
+    if (!promo.trim()) {
+      Alert.alert(
+        "Promo",
+        "Please enter promo code."
+      );
+
+      return;
+    }
+
+    Alert.alert(
+      "Promo",
+      "Promo feature coming soon."
+    );
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
 
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{
+          paddingBottom: 30
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Text style={styles.backArrow}>←</Text>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backArrow}>
+              ←
+            </Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Checkout</Text>
+
+          <Text style={styles.headerTitle}>
+            Checkout
+          </Text>
         </View>
 
         {/* ORDER SUMMARY */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Order Summary</Text>
+          <Text style={styles.sectionTitle}>
+            Order Summary
+          </Text>
 
           <View style={styles.movieInfo}>
             <Image
-              source={movie?.img || require("../assets/img/spider_man.jpg")}
+              source={
+                movie?.img ||
+                require("../assets/img/spider_man.jpg")
+              }
               style={styles.poster}
             />
+
             <View style={styles.movieDetail}>
-              <Text style={styles.movieTitle}>{movie?.name || "Movie"}</Text>
-              <Text style={styles.grayText}>Cinema 1 • IMAX</Text>
-              <Text style={styles.grayText}>Sat, 10 May • 19:45</Text>
+              <Text style={styles.movieTitle}>
+                {movie?.name || "Movie"}
+              </Text>
+
+              <Text style={styles.grayText}>
+                Cinema 1 • IMAX
+              </Text>
+
+              <Text style={styles.grayText}>
+                Sat, 10 May • 19:45
+              </Text>
             </View>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.infoRow}>
-            <Text style={styles.grayText}>Seats</Text>
+            <Text style={styles.grayText}>
+              Seats
+            </Text>
+
             <Text style={styles.whiteText}>
-              {selectedSeats.map(s => s.id).join(", ") || "No seats selected"}
+              {selectedSeats.length > 0
+                ? selectedSeats
+                    .map((s) => s.id)
+                    .join(", ")
+                : "No seats selected"}
             </Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={styles.grayText}>Ticket ({selectedSeats.length}x)</Text>
-            <Text style={styles.whiteText}>Rp {totalPrice.toLocaleString()}</Text>
+            <Text style={styles.grayText}>
+              Ticket ({selectedSeats.length}x)
+            </Text>
+
+            <Text style={styles.whiteText}>
+              Rp {totalPrice.toLocaleString()}
+            </Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={styles.grayText}>Service Fee</Text>
-            <Text style={styles.whiteText}>Rp {serviceFee.toLocaleString()}</Text>
+            <Text style={styles.grayText}>
+              Service Fee
+            </Text>
+
+            <Text style={styles.whiteText}>
+              Rp {serviceFee.toLocaleString()}
+            </Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Grand Total</Text>
-            <Text style={styles.totalPrice}>Rp {grandTotal.toLocaleString()}</Text>
+            <Text style={styles.totalLabel}>
+              Grand Total
+            </Text>
+
+            <Text style={styles.totalPrice}>
+              Rp {grandTotal.toLocaleString()}
+            </Text>
           </View>
         </View>
 
-        {/* PAYMENT METHOD */}
-        <Text style={styles.mainSectionTitle}>Payment Method</Text>
+        {/* PAYMENT */}
+        <Text style={styles.mainSectionTitle}>
+          Payment Method
+        </Text>
 
         {payments.map((p) => (
           <TouchableOpacity
             key={p.id}
             style={[
               styles.paymentItem,
-              selectedPayment === p.id && styles.activePayment
+              selectedPayment === p.id &&
+                styles.activePayment
             ]}
-            onPress={() => setSelectedPayment(p.id)}
-            activeOpacity={0.7}
+            onPress={() =>
+              setSelectedPayment(p.id)
+            }
+            activeOpacity={0.8}
           >
             <View
               style={[
                 styles.iconContainer,
-                selectedPayment === p.id && { backgroundColor: "#fb6e3b" }
+                selectedPayment === p.id && {
+                  backgroundColor:
+                    "#fb6e3b"
+                }
               ]}
             >
-              <Text style={styles.iconText}>{p.icon}</Text>
+              <Text style={styles.iconText}>
+                {p.icon}
+              </Text>
             </View>
 
-            <View style={styles.paymentTextContainer}>
-              <Text style={styles.paymentTitle}>{p.title}</Text>
-              <Text style={styles.grayTextSmall}>{p.desc}</Text>
+            <View
+              style={
+                styles.paymentTextContainer
+              }
+            >
+              <Text style={styles.paymentTitle}>
+                {p.title}
+              </Text>
+
+              <Text
+                style={styles.grayTextSmall}
+              >
+                {p.desc}
+              </Text>
             </View>
 
             <View
               style={[
                 styles.radioCircle,
-                selectedPayment === p.id && styles.radioCircleActive
+                selectedPayment === p.id &&
+                  styles.radioCircleActive
               ]}
             >
               {selectedPayment === p.id && (
-                <Text style={styles.checkMark}>✓</Text>
+                <Text
+                  style={styles.checkMark}
+                >
+                  ✓
+                </Text>
               )}
             </View>
           </TouchableOpacity>
         ))}
 
-        {/* PROMO CODE */}
-        <Text style={styles.mainSectionTitle}>Promo Code</Text>
+        {/* PROMO */}
+        <Text style={styles.mainSectionTitle}>
+          Promo Code
+        </Text>
+
         <View style={styles.promoRow}>
           <TextInput
             style={styles.promoInput}
@@ -144,28 +310,58 @@ const CheckoutScreen = ({ navigation, route }) => {
             value={promo}
             onChangeText={setPromo}
           />
-          <TouchableOpacity style={styles.applyBtn}>
-            <Text style={styles.applyBtnText}>Apply</Text>
+
+          <TouchableOpacity
+            style={styles.applyBtn}
+            onPress={handleApplyPromo}
+          >
+            <Text style={styles.applyBtnText}>
+              Apply
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* FINAL PAY BUTTON */}
-        <TouchableOpacity style={styles.finalPayBtn} onPress={handlePay}>
+        {/* BUTTON */}
+        <TouchableOpacity
+          style={[
+            styles.finalPayBtn,
+            paying && {
+              opacity: 0.6
+            }
+          ]}
+          onPress={handlePay}
+          activeOpacity={0.8}
+          disabled={paying}
+        >
           <Text style={styles.finalPayText}>
-            Pay Rp {grandTotal.toLocaleString()}
+            {paying
+              ? "Processing..."
+              : `Pay Rp ${grandTotal.toLocaleString()}`}
           </Text>
         </TouchableOpacity>
-
       </ScrollView>
     </SafeAreaView>
   );
 };
 
+export default CheckoutScreen;
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#0d0d0d" },
-  container: { flex: 1, padding: 16 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#0d0d0d"
+  },
 
-  header: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
+  container: {
+    flex: 1,
+    padding: 16
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20
+  },
+
   backBtn: {
     width: 45,
     height: 45,
@@ -175,29 +371,108 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 15
   },
-  backArrow: { color: "#fff", fontSize: 20 },
-  headerTitle: { color: "#fff", fontSize: 20, fontWeight: "bold" },
 
-  card: { backgroundColor: "#151515", borderRadius: 20, padding: 20, marginBottom: 25 },
-  sectionTitle: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 15 },
+  backArrow: {
+    color: "#fff",
+    fontSize: 20
+  },
 
-  movieInfo: { flexDirection: "row", marginBottom: 15 },
-  poster: { width: 75, height: 100, borderRadius: 12, marginRight: 15 },
-  movieDetail: { justifyContent: "center" },
-  movieTitle: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 4 },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold"
+  },
 
-  divider: { height: 1, backgroundColor: "#262626", marginVertical: 15 },
-  infoRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 10 },
+  card: {
+    backgroundColor: "#151515",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 25
+  },
 
-  whiteText: { color: "#fff", fontWeight: "500" },
-  grayText: { color: "#888", fontSize: 14 },
-  grayTextSmall: { color: "#666", fontSize: 12 },
+  sectionTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 15
+  },
 
-  totalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  totalLabel: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  totalPrice: { color: "#fb6e3b", fontSize: 18, fontWeight: "bold" },
+  movieInfo: {
+    flexDirection: "row",
+    marginBottom: 15
+  },
 
-  mainSectionTitle: { color: "#fff", fontSize: 16, fontWeight: "bold", marginBottom: 15, marginTop: 5 },
+  poster: {
+    width: 75,
+    height: 100,
+    borderRadius: 12,
+    marginRight: 15
+  },
+
+  movieDetail: {
+    justifyContent: "center",
+    flex: 1
+  },
+
+  movieTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#262626",
+    marginVertical: 15
+  },
+
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10
+  },
+
+  whiteText: {
+    color: "#fff",
+    fontWeight: "500"
+  },
+
+  grayText: {
+    color: "#888",
+    fontSize: 14
+  },
+
+  grayTextSmall: {
+    color: "#666",
+    fontSize: 12
+  },
+
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+
+  totalLabel: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold"
+  },
+
+  totalPrice: {
+    color: "#fb6e3b",
+    fontSize: 18,
+    fontWeight: "bold"
+  },
+
+  mainSectionTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 15,
+    marginTop: 5
+  },
 
   paymentItem: {
     flexDirection: "row",
@@ -209,7 +484,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "transparent"
   },
-  activePayment: { borderColor: "#fb6e3b" },
+
+  activePayment: {
+    borderColor: "#fb6e3b"
+  },
 
   iconContainer: {
     width: 45,
@@ -220,9 +498,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 15
   },
-  iconText: { fontSize: 20 },
-  paymentTextContainer: { flex: 1 },
-  paymentTitle: { color: "#fff", fontWeight: "600", fontSize: 15 },
+
+  iconText: {
+    fontSize: 20
+  },
+
+  paymentTextContainer: {
+    flex: 1
+  },
+
+  paymentTitle: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 15
+  },
 
   radioCircle: {
     width: 24,
@@ -233,10 +522,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center"
   },
-  radioCircleActive: { backgroundColor: "#fb6e3b", borderColor: "#fb6e3b" },
-  checkMark: { color: "#fff", fontSize: 12, fontWeight: "bold" },
 
-  promoRow: { flexDirection: "row", gap: 12, marginBottom: 30 },
+  radioCircleActive: {
+    backgroundColor: "#fb6e3b",
+    borderColor: "#fb6e3b"
+  },
+
+  checkMark: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold"
+  },
+
+  promoRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 30
+  },
+
   promoInput: {
     flex: 1,
     backgroundColor: "#151515",
@@ -246,8 +549,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#222"
   },
-  applyBtn: { backgroundColor: "#fb6e3b", paddingHorizontal: 25, borderRadius: 15, justifyContent: "center" },
-  applyBtnText: { color: "#fff", fontWeight: "bold" },
+
+  applyBtn: {
+    backgroundColor: "#fb6e3b",
+    paddingHorizontal: 25,
+    borderRadius: 15,
+    justifyContent: "center"
+  },
+
+  applyBtnText: {
+    color: "#fff",
+    fontWeight: "bold"
+  },
 
   finalPayBtn: {
     backgroundColor: "#fb6e3b",
@@ -255,12 +568,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     shadowColor: "#fb6e3b",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {
+      width: 0,
+      height: 4
+    },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 5
   },
-  finalPayText: { color: "#fff", fontSize: 16, fontWeight: "bold" }
-});
 
-export default CheckoutScreen;
+  finalPayText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold"
+  }
+});

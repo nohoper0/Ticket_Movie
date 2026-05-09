@@ -8,7 +8,7 @@ import { COLORS } from "../utils/colors";
 
 const Tab = createBottomTabNavigator();
 
-export default function AppTabs({ setIsLoggedIn }) {
+export default function AppTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -27,9 +27,7 @@ export default function AppTabs({ setIsLoggedIn }) {
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="MyTickets" component={MyTicketsScreen} options={{ title: "Tickets" }} />
 
-      <Tab.Screen name="Profile">
-        {(props) => <ProfileScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
-      </Tab.Screen>
+     <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
