@@ -437,62 +437,58 @@ npm install
 
 ## 📸 Ảnh chụp màn hình *(Screenshots)*
 
-## 📱 Giao diện ứng dụng
+## 📱 1 số giao diện của ứng dụng
 
 <table align="center">
   <tr>
-    <td align="center">
-      <img src="img/home.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/27ba144c-757f-473c-bba0-3fd9930fcf37" width="180"/><br/>
       <b>Home Screen</b>
     </td>
-    <td align="center">
-      <img src="img/search.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/f8b8e7a2-b8be-45f7-82e5-65d7cd721be0" width="180"/><br/>
       <b>Search Screen</b>
     </td>
-    <td align="center">
-      <img src="img/detail.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/877f79d4-0faa-4fbf-a466-31fc516944e6" width="180"/><br/>
       <b>Movie Detail</b>
     </td>
   </tr>
 
   <tr>
-    <td align="center">
-      <img src="img/suatchieu.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/10c81e09-afdc-4741-9951-95df76834c09" width="180"/><br/>
       <b>Showtime Selection</b>
     </td>
-    <td align="center">
-      <img src="img/ghe.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/9b667c2f-1646-41e2-a33a-ecede2187651" width="180"/><br/>
       <b>Seat Selection</b>
     </td>
-    <td align="center">
-      <img src="img/thanhtoan.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/8101c97f-8629-4b09-9cfb-16a7d689e095" width="180"/><br/>
       <b>Payment Screen</b>
     </td>
   </tr>
 
   <tr>
-    <td align="center">
-      <img src="img/ticket.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/afa7002f-201f-4cd0-ae1e-d02354fae768" width="180"/><br/>
       <b>My Ticket</b>
     </td>
-    <td align="center">
-      <img src="img/profile.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/39daa3bd-1c90-40ed-87cf-873b8b65db30" width="180"/><br/>
       <b>Profile Screen</b>
     </td>
-    <td align="center">
-      <img src="img/doimatkhau.png" width="180"/><br/>
+    <td align="center" width="220">
+      <img src="https://github.com/user-attachments/assets/06cc9524-f5af-43fe-9ee0-97fe792de9d8" width="180"/><br/>
       <b>Change Password</b>
     </td>
   </tr>
 </table>
 
 ## 📄 License
-
 Dự án này được phát triển phục vụ mục đích **học tập** tại trường đại học.  
 © 2025 — Ticket Movie Team. All rights reserved.
-
----
-
 <p align="center">
   Made with ❤️ by <strong>Ticket Movie Team</strong>
 </p>
