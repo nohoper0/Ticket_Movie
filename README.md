@@ -486,6 +486,11 @@ npm install
   </tr>
 </table>
 
+
+## Link video demo: 
+
+https://drive.google.com/file/d/1sAk9MWgPbxP8DCFyqoEKR5pPAzl-hO9M/view?usp=sharing
+
 ## 📄 License
 Dự án này được phát triển phục vụ mục đích **học tập** tại trường đại học.  
 © 2025 — Ticket Movie Team. All rights reserved.
