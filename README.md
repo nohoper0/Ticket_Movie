@@ -4,6 +4,13 @@
 
 ---
 
+<h1 style="font-size: 60px; font-weight: bold;">
+  Link video demo:
+</h1>
+
+https://drive.google.com/file/d/1sAk9MWgPbxP8DCFyqoEKR5pPAzl-hO9M/view?usp=sharing
+
+
 ## 📖 Giới thiệu Website / Hệ thống
 
 **Ticket Movie App** là một ứng dụng di động đặt vé xem phim trực tuyến được xây dựng trên nền tảng **React Native (Expo)**. Ứng dụng cho phép người dùng duyệt danh sách phim đang chiếu & sắp chiếu, xem thông tin chi tiết phim, chọn rạp — suất chiếu — chỗ ngồi, và tiến hành thanh toán đặt vé chỉ trong vài thao tác.
